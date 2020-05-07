@@ -4,6 +4,6 @@
     "config_flow": true,
     "documentation": "https://github.com/sockless-coding/garo_wallbox/",
     "dependencies": [],
-    "codeowners": ["Sockless"]
+    "codeowners": ["sockless-coding"]
   }
   
