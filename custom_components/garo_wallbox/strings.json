@@ -1,0 +1,17 @@
+{
+    "config": {
+      "step": {
+        "user": {
+          "title": "Configure Garo Wallbox",
+          "description": "Enter IP address of your Garo Wallbox.",
+          "data": { "host": "Host" }
+        }
+      },
+      "abort": {
+        "device_timeout": "Timeout connecting to the device.",
+        "device_fail": "Unexpected error creating device.",
+        "already_configured": "Device is already configured"
+      }
+    }
+  }
+  
