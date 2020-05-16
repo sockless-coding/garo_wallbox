@@ -13,12 +13,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_NAME,
     CONF_HOST,
-    CONF_PORT,
-    CONF_SSL,
-    CONF_VERIFY_SSL,
+    CONF_NAME,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -43,7 +42,7 @@ async def async_setup(hass: HomeAssistant, config: Dict) -> bool:
 
 async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
     conf = entry.data
-    device = await garo_setup(hass, conf[CONF_HOST])
+    device = await garo_setup(hass, conf[CONF_HOST], conf[CONF_NAME])
     if not device:
         return False
     hass.data.setdefault(DOMAIN, {}).update({entry.entry_id: device})
@@ -51,6 +50,9 @@ async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
         hass.async_create_task(
             hass.config_entries.async_forward_entry_setup(entry, component)
         )
+
+    """device_registry = await dr.async_get_registry(hass)
+    device_registry.async_get_or_create(**device.device_info)"""
     return True
 
 async def async_unload_entry(hass, config_entry):
@@ -66,12 +68,12 @@ async def async_unload_entry(hass, config_entry):
         hass.data.pop(DOMAIN)
     return True
 
-async def garo_setup(hass, host):
+async def garo_setup(hass, host, name):
     """Create a Garo instance only once."""
     session = hass.helpers.aiohttp_client.async_get_clientsession()
     try:
         with timeout(TIMEOUT):
-            device = GaroDevice(host, session)
+            device = GaroDevice(host, name, session)
             await device.init()
     except asyncio.TimeoutError:
         _LOGGER.debug("Connection to %s timed out", host)

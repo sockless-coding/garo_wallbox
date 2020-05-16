@@ -5,7 +5,7 @@ from datetime import timedelta
 import asyncio
 
 from homeassistant.util import Throttle
-from .const import GARO_PRODUCT_MAP
+from .const import GARO_PRODUCT_MAP, DOMAIN
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -42,14 +42,17 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
 class GaroDevice:
 
-    def __init__(self, host, session):
+    def __init__(self, host, name, session):
         self.host = host
+        self.name = name
         self._status = None
         self._session = session
     
     async def init(self):
         await self.async_get_info()
         self.id = 'garo_{}'.format(self.info.serial)
+        if self.name is None:
+            self.name = f'{self.info.model} ({self.host})'
         await self.async_update()
 
     @property
@@ -60,10 +63,10 @@ class GaroDevice:
     def device_info(self):
         """Return a device description for device registry."""
         return {
-            "identifieres": self.id,
+            "identifiers": { (DOMAIN, self.id) },
             "manufacturer": "Garo",
             "model": self.info.model,
-            "name": self.host
+            "name": self.name,
         }
 
     def _request(self, parameter_list):

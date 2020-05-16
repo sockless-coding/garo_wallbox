@@ -4,7 +4,7 @@
         "user": {
           "title": "Configure Garo Wallbox",
           "description": "Enter IP address of your Garo Wallbox.",
-          "data": { "host": "Host" }
+          "data": { "host": "Host", "name": "Friendly name" }
         }
       },
       "abort": {

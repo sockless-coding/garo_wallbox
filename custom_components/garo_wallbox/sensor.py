@@ -15,7 +15,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up Daikin climate based on config_entry."""
+    """Set up using config_entry."""
     device = hass.data[GARO_DOMAIN].get(entry.entry_id)
     async_add_entities([
         GaroSensor(device, 'Status', 'status'), 
@@ -25,14 +25,16 @@ async def async_setup_entry(hass, entry, async_add_entities):
         GaroSensor(device, "Phases", 'nr_of_phases'),
         GaroSensor(device, "Current Limit", 'current_limit', 'A'),
         GaroSensor(device, "Pilot Level", 'pilot_level', 'A'),
-        GaroSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS)
+        GaroSensor(device, "Session Energy", 'acc_session_energy', "Wh"),
+        GaroSensor(device, "Total Energy", 'latest_reading', "Wh"),
+        GaroSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
         ])
 
 class GaroSensor(Entity):
     def __init__(self, device: GaroDevice, name, sensor, unit = None):
         """Initialize the sensor."""
         self._device = device
-        self._name = f"{device.id} {name}"
+        self._name = f"{device.name} {name}"
         self._sensor = sensor
         self._unit = unit
 
