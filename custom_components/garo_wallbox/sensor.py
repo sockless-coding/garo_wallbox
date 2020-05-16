@@ -62,7 +62,36 @@ class GaroSensor(Entity):
             icon = "mdi:flash"
         elif self._sensor == "pilot_level":
             icon = "mdi:flash"
-        
+        elif self._sensor == "acc_session_energy":
+            icon = "mdi:flash"
+        elif self._sensor == "latest_reading":
+            icon = "mdi:flash"
+        elif self._sensor == "status":
+            switcher = {
+                Status.CABLE_FAULT: "mdi:alert",
+                Status.CHANGING: "mdi:update",
+                Status.CHARGING: "mdi:battery-charging",
+                Status.CHARGING_CANCELLED: "mdi:cancel",
+                Status.CHARGING_FINISHED: "mdi:battery",
+                Status.CHARGING_PAUSED: "mdi:pause",
+                Status.CONNECTED: "mdi:power-plug",
+                Status.CONTACTOR_FAULT: "mdi:alert",
+                Status.CRITICAL_TEMPERATURE: "mdi:alert",
+                Status.DC_ERROR: "mdi:alert",
+                Status.INITIALIZATION: "mdi:timer-sand",
+                Status.LOCK_FAULT: "mdi:alert",
+                Status.NOT_CONNECTED: "mdi:power-plug-off",
+                Status.OVERHEAT: "mdi:alert",
+                Status.RCD_FAULT: "mdi:alert",
+                Status.SEARCH_COMM: "mdi:help",
+                Status.VENT_FAULT: "mdi:alert"
+            }
+            icon = switcher.get(self._device.status.status, None)
+        elif self._sensor == "nr_of_phases":
+            if self.state == 1:
+                icon = "mdi:record-circle-outline"
+            else:
+                icon = "mdi:google-circles-communities"
         return icon
 
     @property

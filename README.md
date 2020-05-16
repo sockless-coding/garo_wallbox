@@ -2,6 +2,8 @@
 
 This is a custom component to allow control of Garo Wallboxes in [HomeAssistant](https://home-assistant.io).
 
+![Example entities](https://github.com/sockless-coding/garo_wallbox/raw/master/doc/entities.png)
+
 #### Support Development
 - :coffee:&nbsp;&nbsp;[Buy me a coffee](https://www.buymeacoffee.com/sockless)
 
