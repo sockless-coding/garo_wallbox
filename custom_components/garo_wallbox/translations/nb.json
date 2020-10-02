@@ -1,0 +1,17 @@
+{
+    "config": {
+      "step": {
+        "user": {
+          "title": "Konfigurer Garo Wallbox",
+          "description": "Skriv inn IP-adressen til Garo Wallbox.",
+          "data": { "vert": "Vert", "navn": "Vennlig navn" }
+        }
+      },
+      "abort": {
+        "device_timeout": "Tidsavbrudd for tilkobling til enheten.",
+        "device_fail": "Uventet feil under oppretting av enhet.",
+        "already_configured": "Enheten er allerede konfigurert"
+      }
+    }
+  }
+  
