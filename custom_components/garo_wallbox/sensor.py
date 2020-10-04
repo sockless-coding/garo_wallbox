@@ -25,8 +25,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         GaroSensor(device, "Phases", 'nr_of_phases'),
         GaroSensor(device, "Current Limit", 'current_limit', 'A'),
         GaroSensor(device, "Pilot Level", 'pilot_level', 'A'),
-        GaroSensor(device, "Session Energy", 'acc_session_energy', "Wh"),
-        GaroSensor(device, "Total Energy", 'latest_reading', "Wh"),
+        GaroSensor(device, "Session Energy", 'acc_session_energy', "kWh"),
+        GaroSensor(device, "Total Energy", 'latest_reading', "kWh"),
         GaroSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
         ])
 
