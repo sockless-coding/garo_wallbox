@@ -1,3 +1,5 @@
+import logging
+
 import requests
 import time
 from enum import Enum
@@ -12,10 +14,14 @@ current_milli_time = lambda: int(round(time.time() * 1000))
 MODE_ON, MODE_OFF, MODE_SCHEMA = ('ALWAYS_ON', 'ALWAYS_OFF', 'SCHEMA')
 STATUS_CHANGING, STATUS_NOT_CONNECTED, STATUS_CONNECTED, STATUS_SEARCH_COMM = ('CHANGING','NOT_CONNECTED','CONNECTED','SEARCH_COMM')
 
+HEADER_JSON = {'content-type': 'application/json; charset=utf-8'}
+
+_LOGGER = logging.getLogger(__name__)
+
 class Mode(Enum):
-    ON = 'ALWAYS_ON'
-    OFF = 'ALWAYS_OFF'
-    SCHEMA = 'SCHEMA'
+    On = MODE_ON
+    Off = MODE_OFF
+    Schema = MODE_SCHEMA
 
 
 class Status(Enum):
@@ -74,6 +80,9 @@ class GaroDevice:
     
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
+        await self._do_update()
+
+    async def _do_update(self):
         response = await self._session.request(method='GET', url=self.__get_url('status', True))
         response_json = await response.json()
         self._status = GaroStatus(response_json)
@@ -83,8 +92,25 @@ class GaroDevice:
         response_json = await response.json()
         self.info = GaroDeviceInfo(response_json)
 
-    def set_mode(self, mode: Mode):
-        return requests.post(self.__get_url('mode'), data=mode.value).json()
+    async def set_mode(self, mode: Mode):
+        response = await self._session.post(self.__get_url('mode'), data=mode.value, headers = HEADER_JSON)
+        await response.text()
+        await self._do_update()
+
+    async def set_current_limit(self, limit):
+        response = await self._session.request(method='GET', url=self.__get_url('config', True))
+        response_json = await response.json()
+        response_json['reducedCurrentIntervals'] = [{
+            'chargeLimit': str(limit),
+            'schemaId': 1,
+            'start': '00:00:00',
+            'stop':'24:00:00',
+            'weekday': 8
+        }]
+        #_LOGGER.warning(f'Set limit: {response_json}')
+        response = await self._session.post(self.__get_url('config'), json=response_json, headers = HEADER_JSON)
+        await response.text()
+        await self._do_update()
 
 
     def __get_url(self, action, add_tick = False):

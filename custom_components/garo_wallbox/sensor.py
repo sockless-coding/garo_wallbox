@@ -1,11 +1,15 @@
 import logging
 
+import voluptuous as vol
+
 from homeassistant.const import CONF_ICON, CONF_NAME, TEMP_CELSIUS
 from homeassistant.helpers.entity import Entity
+from homeassistant.helpers import config_validation as cv, entity_platform, service
 
 from . import DOMAIN as GARO_DOMAIN
 
 from .garo import GaroDevice, Mode, Status
+from .const import (ATTR_MODES, SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,8 +22,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     """Set up using config_entry."""
     device = hass.data[GARO_DOMAIN].get(entry.entry_id)
     async_add_entities([
-        GaroSensor(device, 'Status', 'status'), 
-        GaroSensor(device, 'Mode', 'mode'), 
+        GaroMainSensor(device),
+        GaroSensor(device, 'Status', 'status'),
         GaroSensor(device, "Charging Current", 'current_charging_current', 'A'),
         GaroSensor(device, "Charging Power", 'current_charging_power', 'W'),
         GaroSensor(device, "Phases", 'nr_of_phases'),
@@ -29,6 +33,73 @@ async def async_setup_entry(hass, entry, async_add_entities):
         GaroSensor(device, "Total Energy", 'latest_reading', "Wh"),
         GaroSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
         ])
+
+    platform = entity_platform.current_platform.get()
+
+    platform.async_register_entity_service(
+        SERVICE_SET_MODE,
+        {
+            vol.Required('mode'): cv.string,
+        },
+        "async_set_mode",
+    )
+    platform.async_register_entity_service(
+        SERVICE_SET_CURRENT_LIMIT,
+        {
+            vol.Required('limit'): cv.positive_int,
+        },
+        "async_set_current_limit",
+    )
+
+class GaroMainSensor(Entity):
+    def __init__(self, device: GaroDevice):
+        """Initialize the sensor."""
+        self._device = device
+        self._name = f"{device.name}"
+        self._sensor = "sensor"
+
+    @property
+    def unique_id(self):
+        """Return a unique ID."""
+        return f"{self._device.id}-{self._sensor}"
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return self._name
+
+    @property
+    def state(self):
+        """Return the state of the sensor."""
+        return self._device.status.mode.name
+
+    @property
+    def modes(self):
+        return [f.name for f in Mode]
+
+    async def async_set_mode(self, mode):
+        await self._device.set_mode(Mode[mode])
+
+    async def async_set_current_limit(self, limit):
+        await self._device.set_current_limit(limit)
+
+    async def async_update(self):
+        await self._device.async_update()
+
+    @property
+    def device_info(self):
+        """Return a device description for device registry."""
+        return self._device.device_info
+
+    @property
+    def device_state_attributes(self):
+        attrs = {}
+        try:
+            attrs[ATTR_MODES] = self.modes
+        except KeyError:
+            pass
+        return attrs
+        
 
 class GaroSensor(Entity):
     def __init__(self, device: GaroDevice, name, sensor, unit = None):
@@ -97,8 +168,6 @@ class GaroSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        if self._sensor == 'mode':
-            return self.mode_as_str()
         if self._sensor == 'status':
             return self.status_as_str()
 
@@ -116,13 +185,7 @@ class GaroSensor(Entity):
         """Return a device description for device registry."""
         return self._device.device_info
 
-    def mode_as_str(self):
-        switcher = {
-            Mode.ON: 'On',
-            Mode.OFF: 'Off',
-            Mode.SCHEMA: 'Schema'
-        }
-        return switcher.get(self._device.status.mode, "Unknown")
+    
 
     def status_as_str(self):
         switcher = {
@@ -145,3 +208,4 @@ class GaroSensor(Entity):
             Status.VENT_FAULT: "Ventilation required"
         }
         return switcher.get(self._device.status.status, "Unknown")
+

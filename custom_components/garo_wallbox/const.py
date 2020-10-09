@@ -6,6 +6,12 @@ KEY_IP = "ip"
 
 TIMEOUT = 60
 
+
+SERVICE_SET_MODE = "set_mode"
+SERVICE_SET_CURRENT_LIMIT = "set_current_limit"
+
+ATTR_MODES = "modes"
+
 GARO_PRODUCT_MAP = {
     1: 'GLBMW-T137FC',
     2: 'GLBMW-T237FC',
