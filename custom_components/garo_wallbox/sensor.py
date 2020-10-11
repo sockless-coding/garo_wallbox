@@ -69,6 +69,10 @@ class GaroMainSensor(Entity):
         return self._name
 
     @property
+    def icon(self):
+        return "mdi:car-electric"
+
+    @property
     def state(self):
         """Return the state of the sensor."""
         return self._device.status.mode.name

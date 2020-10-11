@@ -1,4 +1,4 @@
-# Garo Wallbox - HomeAssistant Integration
+# Garo Wallbox (EVSE) - HomeAssistant Integration
 
 [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]](LICENSE)
@@ -13,11 +13,36 @@ This is a custom component to allow control of Garo Wallboxes in [HomeAssistant]
 - :coffee:&nbsp;&nbsp;[Buy me a coffee](https://www.buymeacoffee.com/sockless)
 
 
-# Configuration
+## Installation
 
-The Garo Wallbox integration can be configured in two ways
-* Automatically via the discovery integration.
-* Via the Home Assistant user interface where it will let you enter the IP-address of your Garo Wallbox.
+### Install using HACS (recomended)
+If you do not have HACS installed yet visit https://hacs.xyz for installation instructions.
+In HACS go to the Integrations section hit the big + at the bottom right and search for **Garo Wallbox**.
+
+### Install manually
+Clone or copy this repository and copy the folder 'custom_components/garo_wallbox' into '<homeassistant config>/custom_components/garo_wallbox'
+
+## Configuration
+
+Once installed the Garo Wallbox integration can be configured via the Home Assistant integration interface 
+where you can enter the IP address of the device.
+
+## Services
+
+### Set the mode of the EVSE
+Service: `garo_wallbox.set_mode`
+| Parameter | Description | Example |
+| - | - | - |
+| entity_id | Name of the entity to change | sensor.garage_charger |
+| mode | The new mode available modes: `On`, `Off`, `Schema` | On |
+
+### Set the charge limit
+Service: `garo_wallbox.set_current_limit`
+| Parameter | Description | Example |
+| - | - | - |
+| entity_id | Name of the entity to change | sensor.garage_charger |
+| limit | The new limit in Ampare | 10 |
+
 
 [license-shield]: https://img.shields.io/github/license/sockless-coding/garo_wallbox.svg?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/sockless-coding/garo_wallbox.svg?style=for-the-badge

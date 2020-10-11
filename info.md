@@ -8,8 +8,23 @@ This is a custom component to allow control of Garo Wallboxes in [HomeAssistant]
 - :coffee:&nbsp;&nbsp;[Buy me a coffee](https://www.buymeacoffee.com/sockless)
 
 
-# Configuration
+## Configuration
 
-The Garo Wallbox integration can be configured in two ways
-* Automatically via the discovery integration.
-* Via the Home Assistant user interface where it will let you enter the IP-address of your Garo Wallbox.
+Once installed the Garo Wallbox integration can be configured via the Home Assistant integration interface 
+where you can enter the IP address of the device.
+
+## Services
+
+### Set the mode of the EVSE
+Service: `garo_wallbox.set_mode`
+| Parameter | Description | Example |
+| - | - | - |
+| entity_id | Name of the entity to change | sensor.garage_charger |
+| mode | The new mode available modes: `On`, `Off`, `Schema` | On |
+
+### Set the charge limit
+Service: `garo_wallbox.set_current_limit`
+| Parameter | Description | Example |
+| - | - | - |
+| entity_id | Name of the entity to change | sensor.garage_charger |
+| limit | The new limit in Ampare | 10 |
