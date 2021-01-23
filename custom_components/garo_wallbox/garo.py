@@ -130,6 +130,8 @@ class GaroStatus:
         self.power_mode = response['powerMode']
         self.current_charging_current = max(0,response['currentChargingCurrent'] / 1000)
         self.current_charging_power = max(0,response['currentChargingPower'])
+        if self.current_charging_power > 32000:
+            self.current_charging_power = 0
         self.acc_session_energy = response['accSessionEnergy']
         self.latest_reading = response['latestReading']
         self.current_temperature = response['currentTemperature']
