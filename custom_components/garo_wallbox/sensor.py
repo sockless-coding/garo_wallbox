@@ -159,7 +159,8 @@ class GaroSensor(Entity):
                 Status.OVERHEAT: "mdi:alert",
                 Status.RCD_FAULT: "mdi:alert",
                 Status.SEARCH_COMM: "mdi:help",
-                Status.VENT_FAULT: "mdi:alert"
+                Status.VENT_FAULT: "mdi:alert",
+                Status.UNAVAILABLE: "mdi:alert"
             }
             icon = switcher.get(self._device.status.status, None)
         elif self._sensor == "nr_of_phases":
@@ -209,7 +210,8 @@ class GaroSensor(Entity):
             Status.OVERHEAT: "Overtemperature, charging temporarily restricted to 6A",
             Status.RCD_FAULT: "RCD fault",
             Status.SEARCH_COMM: "Vehicle connected",
-            Status.VENT_FAULT: "Ventilation required"
+            Status.VENT_FAULT: "Ventilation required",
+            Status.UNAVAILABLE: "Unavailable"
         }
         return switcher.get(self._device.status.status, "Unknown")
 

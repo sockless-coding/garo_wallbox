@@ -43,6 +43,7 @@ class Status(Enum):
     VENT_FAULT = 'VENT_FAULT'
     DC_ERROR = 'DC_ERROR'
     UNKNOWN = 'UNKNOWN'
+    UNAVAILABLE = 'UNAVAILABLE'
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
