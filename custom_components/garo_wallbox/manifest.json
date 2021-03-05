@@ -1,7 +1,8 @@
 {
     "domain": "garo_wallbox",
     "name": "Garo Wallbox",
-    "config_flow": true,
+    "version": "1.0.6",
+    "config_flow": true,    
     "documentation": "https://github.com/sockless-coding/garo_wallbox/",
     "dependencies": [],
     "codeowners": ["sockless-coding"]
