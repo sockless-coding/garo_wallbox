@@ -44,6 +44,7 @@ class Status(Enum):
     DC_ERROR = 'DC_ERROR'
     UNKNOWN = 'UNKNOWN'
     UNAVAILABLE = 'UNAVAILABLE'
+    DISABLED = 'DISABLED'
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
