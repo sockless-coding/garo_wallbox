@@ -116,7 +116,7 @@ class GaroDevice:
 
 
     def __get_url(self, action, add_tick = False):
-        return 'http://{}:2222/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
+        return 'http://{}:8080/servlet/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
 
 class GaroStatus:
 
