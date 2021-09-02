@@ -2,8 +2,19 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.const import CONF_ICON, CONF_NAME, TEMP_CELSIUS
+from homeassistant.const import (
+    CONF_ICON, 
+    CONF_NAME, 
+    TEMP_CELSIUS)
 from homeassistant.helpers.entity import Entity
+from homeassistant.components.sensor import (
+    DEVICE_CLASS_ENERGY,
+    DEVICE_CLASS_POWER,
+    PLATFORM_SCHEMA,
+    #STATE_CLASS_TOTAL_INCREASING,
+    STATE_CLASS_MEASUREMENT,
+    SensorEntity,
+)
 from homeassistant.helpers import config_validation as cv, entity_platform, service
 
 from . import DOMAIN as GARO_DOMAIN
@@ -31,6 +42,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         GaroSensor(device, "Pilot Level", 'pilot_level', 'A'),
         GaroSensor(device, "Session Energy", 'acc_session_energy', "Wh"),
         GaroSensor(device, "Total Energy", 'latest_reading', "Wh"),
+        GaroSensor(device, "Total Energy (kWh)", 'latest_reading_k', "kWh"),
         GaroSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
         ])
 
@@ -105,13 +117,18 @@ class GaroMainSensor(Entity):
         return attrs
         
 
-class GaroSensor(Entity):
+class GaroSensor(SensorEntity):
     def __init__(self, device: GaroDevice, name, sensor, unit = None):
         """Initialize the sensor."""
         self._device = device
         self._name = f"{device.name} {name}"
         self._sensor = sensor
         self._unit = unit
+        if self._sensor == "latest_reading" or self._sensor == "latest_reading_k":
+            _LOGGER.info(f'Initiating State sensors {self._name}')
+            self._attr_state_class = STATE_CLASS_MEASUREMENT #STATE_CLASS_TOTAL_INCREASING
+            self._attr_device_class = DEVICE_CLASS_ENERGY
+
 
     @property
     def unique_id(self):
@@ -139,7 +156,9 @@ class GaroSensor(Entity):
             icon = "mdi:flash"
         elif self._sensor == "acc_session_energy":
             icon = "mdi:flash"
-        elif self._sensor == "latest_reading":
+        elif self._sensor == "latest_reading":            
+            icon = "mdi:flash"
+        elif self._sensor == "latest_reading_k":
             icon = "mdi:flash"
         elif self._sensor == "status":
             switcher = {
@@ -170,6 +189,16 @@ class GaroSensor(Entity):
             else:
                 icon = "mdi:google-circles-communities"
         return icon
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return round(self.state, 2)
+
+    @property
+    def native_unit_of_measurement(self):
+        """Return the unit the value is expressed in."""
+        return self._unit
 
     @property
     def state(self):

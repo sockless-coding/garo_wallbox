@@ -55,6 +55,7 @@ class GaroDevice:
         self.name = name
         self._status = None
         self._session = session
+        self._pre_v1_3 = False
     
     async def init(self):
         await self.async_get_info()
@@ -86,11 +87,23 @@ class GaroDevice:
 
     async def _do_update(self):
         response = await self._session.request(method='GET', url=self.__get_url('status', True))
+        if response.status != 200 and not self._pre_v1_3:
+            self._pre_v1_3 = True
+            _LOGGER.info('Switching to pre v1.3.1 endpoint')
+            response = await self._session.request(method='GET', url=self.__get_url('status', True))
+            
+
         response_json = await response.json()
         self._status = GaroStatus(response_json)
 
     async def async_get_info(self):
         response = await self._session.request(method='GET', url=self.__get_url('config', True))
+        _LOGGER.info(f'Response {response}')
+        if response.status != 200 and not self._pre_v1_3:
+            self._pre_v1_3 = True
+            _LOGGER.info('Switching to pre v1.3.1 endpoint')
+            response = await self._session.request(method='GET', url=self.__get_url('config', True))
+                
         response_json = await response.json()
         self.info = GaroDeviceInfo(response_json)
 
@@ -116,6 +129,8 @@ class GaroDevice:
 
 
     def __get_url(self, action, add_tick = False):
+        if self._pre_v1_3:
+            return 'http://{}:2222/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
         return 'http://{}:8080/servlet/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
 
 class GaroStatus:
@@ -136,6 +151,7 @@ class GaroStatus:
             self.current_charging_power = 0
         self.acc_session_energy = response['accSessionEnergy']
         self.latest_reading = response['latestReading']
+        self.latest_reading_k = max(0,response['latestReading'] /1000)
         self.current_temperature = response['currentTemperature']
         self.pilot_level = response['pilotLevel']
         self.session_start_value = response['sessionStartValue']
