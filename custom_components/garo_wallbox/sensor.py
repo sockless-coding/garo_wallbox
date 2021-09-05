@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
     DEVICE_CLASS_ENERGY,
     DEVICE_CLASS_POWER,
     PLATFORM_SCHEMA,
-    #STATE_CLASS_TOTAL_INCREASING,
+    STATE_CLASS_TOTAL_INCREASING,
     STATE_CLASS_MEASUREMENT,
     SensorEntity,
 )
@@ -126,7 +126,7 @@ class GaroSensor(SensorEntity):
         self._unit = unit
         if self._sensor == "latest_reading" or self._sensor == "latest_reading_k":
             _LOGGER.info(f'Initiating State sensors {self._name}')
-            self._attr_state_class = STATE_CLASS_MEASUREMENT #STATE_CLASS_TOTAL_INCREASING
+            self._attr_state_class = STATE_CLASS_TOTAL_INCREASING #STATE_CLASS_MEASUREMENT
             self._attr_device_class = DEVICE_CLASS_ENERGY
 
 

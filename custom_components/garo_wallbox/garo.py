@@ -108,7 +108,10 @@ class GaroDevice:
         self.info = GaroDeviceInfo(response_json)
 
     async def set_mode(self, mode: Mode):
-        response = await self._session.post(self.__get_url('mode'), data=mode.value, headers = HEADER_JSON)
+        if self._pre_v1_3:
+            response = await self._session.post(self.__get_url('mode'), data=mode.value, headers = HEADER_JSON)
+        else:
+            response = await self._session.post(self.__get_url(f'mode/{mode.value}'), headers = HEADER_JSON)
         await response.text()
         await self._do_update()
 
