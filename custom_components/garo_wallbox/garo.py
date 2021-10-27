@@ -94,7 +94,7 @@ class GaroDevice:
             
 
         response_json = await response.json()
-        self._status = GaroStatus(response_json)
+        self._status = GaroStatus(response_json, self._status)
 
     async def async_get_info(self):
         response = await self._session.request(method='GET', url=self.__get_url('config', True))
@@ -138,7 +138,7 @@ class GaroDevice:
 
 class GaroStatus:
 
-    def __init__(self,response):
+    def __init__(self,response, prev_status):
         self.ocpp_state = response['ocppState']
         self.free_charging = response['freeCharging']
         self.ocpp_connection_state = response['ocppConnectionState']
@@ -153,8 +153,12 @@ class GaroStatus:
         if self.current_charging_power > 32000:
             self.current_charging_power = 0
         self.acc_session_energy = response['accSessionEnergy']
-        self.latest_reading = response['latestReading']
-        self.latest_reading_k = max(0,response['latestReading'] /1000)
+        last_reading = response['latestReading']
+        if prev_status is not None and last_reading - prev_status.latest_reading > 500000:
+            last_reading = prev_status.latest_reading
+
+        self.latest_reading = last_reading
+        self.latest_reading_k = max(0,last_reading /1000)
         self.current_temperature = response['currentTemperature']
         self.pilot_level = response['pilotLevel']
         self.session_start_value = response['sessionStartValue']
