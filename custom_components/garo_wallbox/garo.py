@@ -190,6 +190,8 @@ class GaroDeviceInfo:
             self.meter_path = GROUP_METER_PATH
         elif response.get('groupLoadBalanced101'):
             self.meter_path = GROUP101_METER_PATH
+        else:
+            self.meter_path = None
 
 
 class MeterDevice:
