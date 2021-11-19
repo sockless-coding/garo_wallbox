@@ -7,7 +7,8 @@ from datetime import timedelta
 import asyncio
 
 from homeassistant.util import Throttle
-from .const import GARO_PRODUCT_MAP, DOMAIN
+from .const import GARO_PRODUCT_MAP, DOMAIN, VOLTAGE, LOCAL_METER_PATH, GROUP_METER_PATH, GROUP101_METER_PATH, \
+    CURRENT_DIVIDER
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -46,7 +47,7 @@ class Status(Enum):
     UNKNOWN = 'UNKNOWN'
     UNAVAILABLE = 'UNAVAILABLE'
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=15)
 
 class GaroDevice:
 
@@ -56,12 +57,17 @@ class GaroDevice:
         self._status = None
         self._session = session
         self._pre_v1_3 = False
-    
+        self.meter= None
+
     async def init(self):
         await self.async_get_info()
         self.id = 'garo_{}'.format(self.info.serial)
         if self.name is None:
             self.name = f'{self.info.model} ({self.host})'
+        if self.info.meter_path:
+            # load balancing unit with energy meter was found
+            self.meter = MeterDevice(self)
+            await self.meter.init()
         await self.async_update()
 
     @property
@@ -136,6 +142,13 @@ class GaroDevice:
             return 'http://{}:2222/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
         return 'http://{}:8080/servlet/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
 
+    async def get_json_response(self, action, add_tick):
+        url = self.__get_url(action, add_tick)
+        response = await self._session.request(method='GET', url=url)
+        json_response = await response.json()
+        return json_response
+
+
 class GaroStatus:
 
     def __init__(self,response, prev_status):
@@ -171,3 +184,53 @@ class GaroDeviceInfo:
         self.productId = response['productId']
         self.model = GARO_PRODUCT_MAP[int(self.productId)]
         self.max_current = response['maxChargeCurrent']
+        if response.get('localLoadBalanced'):
+            self.meter_path = LOCAL_METER_PATH
+        elif response.get('groupLoadBalanced'):
+            self.meter_path = GROUP_METER_PATH
+        elif response.get('groupLoadBalanced101'):
+            self.meter_path = GROUP101_METER_PATH
+
+
+class MeterDevice:
+    def __init__(self, device):
+        self.main_device = device
+        self.name = device.name + " meter"
+        self.meter_action = f'meterinfo/{device.info.meter_path}'
+        self.status = None
+        self.id = None
+
+    async def init(self):
+        await self.async_update()
+        self.id = 'garo_{}'.format(self.status.serial)
+
+    @property
+    def device_info(self):
+        """Return a device description for device registry."""
+        return {
+            "identifiers": {(DOMAIN, self.id)},
+            "manufacturer": "Garo",
+            "model": self.status.type,
+            "name": self.name,
+            "via_device": (DOMAIN, self.main_device.id)
+        }
+
+    @Throttle(MIN_TIME_BETWEEN_UPDATES)
+    async def async_update(self):
+        json = await self.main_device.get_json_response(self.meter_action, True)
+        self.status = MeterStatus(json)
+
+
+class MeterStatus:
+
+    def __init__(self, response):
+        self.serial = response['meterSerial']
+        self.type = response['type']
+        # TODO, use current divider based on firmware version
+        self.phase1_current = response['phase1Current'] / CURRENT_DIVIDER
+        self.phase2_current = response['phase2Current'] / CURRENT_DIVIDER
+        self.phase3_current = response['phase3Current'] / CURRENT_DIVIDER
+        current = self.phase1_current + self.phase2_current + self.phase3_current
+        self.power = int(round(current * VOLTAGE, -1))
+        self.acc_energy_k = round(response['accEnergy'] / 1000, 1)
+        _LOGGER.debug(self.__dict__)
