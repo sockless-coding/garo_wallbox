@@ -178,7 +178,7 @@ class GaroSensor(SensorEntity):
                 Status.NOT_CONNECTED: "mdi:power-plug-off",
                 Status.OVERHEAT: "mdi:alert",
                 Status.RCD_FAULT: "mdi:alert",
-                Status.SEARCH_COMM: "mdi:help",
+                Status.SEARCH_COMM: "mdi:power-plug-off",
                 Status.VENT_FAULT: "mdi:alert",
                 Status.UNAVAILABLE: "mdi:alert"
             }
