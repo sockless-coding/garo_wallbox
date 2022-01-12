@@ -56,7 +56,7 @@ class GaroDevice:
         self._status = None
         self._session = session
         self._pre_v1_3 = False
-    
+
     async def init(self):
         await self.async_get_info()
         self.id = 'garo_{}'.format(self.info.serial)
@@ -80,7 +80,7 @@ class GaroDevice:
 
     def _request(self, parameter_list):
         pass
-    
+
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         await self._do_update()
@@ -91,7 +91,7 @@ class GaroDevice:
             self._pre_v1_3 = True
             _LOGGER.info('Switching to pre v1.3.1 endpoint')
             response = await self._session.request(method='GET', url=self.__get_url('status', True))
-            
+
 
         response_json = await response.json()
         self._status = GaroStatus(response_json, self._status)
@@ -103,7 +103,7 @@ class GaroDevice:
             self._pre_v1_3 = True
             _LOGGER.info('Switching to pre v1.3.1 endpoint')
             response = await self._session.request(method='GET', url=self.__get_url('config', True))
-                
+
         response_json = await response.json()
         self.info = GaroDeviceInfo(response_json)
 
@@ -152,7 +152,9 @@ class GaroStatus:
         self.current_charging_power = max(0,response['currentChargingPower'])
         if self.current_charging_power > 32000:
             self.current_charging_power = 0
-        self.acc_session_energy = response['accSessionEnergy']
+        session_energy = response['accSessionEnergy']
+        self.acc_session_energy = session_energy
+        self.acc_session_energy_k = max(0, session_energy / 1000)
         last_reading = response['latestReading']
         if prev_status is not None and last_reading - prev_status.latest_reading > 500000:
             last_reading = prev_status.latest_reading
