@@ -3,8 +3,8 @@ import logging
 import voluptuous as vol
 
 from homeassistant.const import (
-    CONF_ICON, 
-    CONF_NAME, 
+    CONF_ICON,
+    CONF_NAME,
     TEMP_CELSIUS)
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import (
@@ -115,7 +115,7 @@ class GaroMainSensor(Entity):
         except KeyError:
             pass
         return attrs
-        
+
 
 class GaroSensor(SensorEntity):
     def __init__(self, device: GaroDevice, name, sensor, unit = None):
@@ -156,7 +156,7 @@ class GaroSensor(SensorEntity):
             icon = "mdi:flash"
         elif self._sensor == "acc_session_energy":
             icon = "mdi:flash"
-        elif self._sensor == "latest_reading":            
+        elif self._sensor == "latest_reading":
             icon = "mdi:flash"
         elif self._sensor == "latest_reading_k":
             icon = "mdi:flash"
@@ -220,7 +220,7 @@ class GaroSensor(SensorEntity):
         """Return a device description for device registry."""
         return self._device.device_info
 
-    
+
 
     def status_as_str(self):
         switcher = {
@@ -240,9 +240,8 @@ class GaroSensor(SensorEntity):
             Status.NOT_CONNECTED: "Vehicle not connected",
             Status.OVERHEAT: "Overtemperature, charging temporarily restricted to 6A",
             Status.RCD_FAULT: "RCD fault",
-            Status.SEARCH_COMM: "Vehicle connected",
+            Status.SEARCH_COMM: "Searching for vehicle",
             Status.VENT_FAULT: "Ventilation required",
             Status.UNAVAILABLE: "Unavailable"
         }
         return switcher.get(self._device.status.status, "Unknown")
-
