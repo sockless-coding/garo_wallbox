@@ -195,7 +195,7 @@ class GaroSensor(SensorEntity):
                 Status.NOT_CONNECTED: "mdi:power-plug-off",
                 Status.OVERHEAT: "mdi:alert",
                 Status.RCD_FAULT: "mdi:alert",
-                Status.SEARCH_COMM: "mdi:help",
+                Status.SEARCH_COMM: "mdi:power-plug-off",
                 Status.VENT_FAULT: "mdi:alert",
                 Status.UNAVAILABLE: "mdi:alert"
             }
@@ -267,7 +267,7 @@ class GaroSensor(SensorEntity):
             Status.NOT_CONNECTED: "Vehicle not connected",
             Status.OVERHEAT: "Overtemperature, charging temporarily restricted to 6A",
             Status.RCD_FAULT: "RCD fault",
-            Status.SEARCH_COMM: "Searching for vehicle",
+            Status.SEARCH_COMM: "Vehicle not connected",
             Status.VENT_FAULT: "Ventilation required",
             Status.UNAVAILABLE: "Unavailable"
         }
