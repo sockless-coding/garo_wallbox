@@ -81,8 +81,8 @@ async def garo_setup(hass, host, name):
     except ClientConnectionError:
         _LOGGER.debug("ClientConnectionError to %s", host)
         raise ConfigEntryNotReady
-    except Exception:  # pylint: disable=broad-except
-        _LOGGER.error("Unexpected error creating device %s", host)
+    except Exception as e:  # pylint: disable=broad-except
+        _LOGGER.error("Unexpected error creating device %s", host, exc_info=e)
         return None
 
     return device
