@@ -41,6 +41,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         GaroSensor(device, "Current Limit", 'current_limit', 'A'),
         GaroSensor(device, "Pilot Level", 'pilot_level', 'A'),
         GaroSensor(device, "Session Energy", 'acc_session_energy', "Wh"),
+        GaroSensor(device, "Session Energy (kWh)", 'acc_session_energy_k', "kWh"),
         GaroSensor(device, "Total Energy", 'latest_reading', "Wh"),
         GaroSensor(device, "Total Energy (kWh)", 'latest_reading_k', "kWh"),
         GaroSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
@@ -155,6 +156,8 @@ class GaroSensor(SensorEntity):
         elif self._sensor == "pilot_level":
             icon = "mdi:flash"
         elif self._sensor == "acc_session_energy":
+            icon = "mdi:flash"
+        elif self._sensor == "acc_session_energy_k":
             icon = "mdi:flash"
         elif self._sensor == "latest_reading":
             icon = "mdi:flash"
