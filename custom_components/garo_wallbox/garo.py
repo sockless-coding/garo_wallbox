@@ -46,7 +46,7 @@ class Status(Enum):
     UNKNOWN = 'UNKNOWN'
     UNAVAILABLE = 'UNAVAILABLE'
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=10)
 
 class GaroDevice:
 
@@ -56,7 +56,7 @@ class GaroDevice:
         self._status = None
         self._session = session
         self._pre_v1_3 = False
-    
+
     async def init(self):
         await self.async_get_info()
         self.id = 'garo_{}'.format(self.info.serial)
@@ -80,7 +80,7 @@ class GaroDevice:
 
     def _request(self, parameter_list):
         pass
-    
+
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         await self._do_update()
@@ -91,7 +91,7 @@ class GaroDevice:
             self._pre_v1_3 = True
             _LOGGER.info('Switching to pre v1.3.1 endpoint')
             response = await self._session.request(method='GET', url=self.__get_url('status', True))
-            
+
 
         response_json = await response.json()
         self._status = GaroStatus(response_json, self._status)
@@ -103,7 +103,7 @@ class GaroDevice:
             self._pre_v1_3 = True
             _LOGGER.info('Switching to pre v1.3.1 endpoint')
             response = await self._session.request(method='GET', url=self.__get_url('config', True))
-                
+
         response_json = await response.json()
         self.info = GaroDeviceInfo(response_json)
 
