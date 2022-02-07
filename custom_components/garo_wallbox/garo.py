@@ -220,12 +220,12 @@ class MeterDevice:
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         json = await self.main_device.get_json_response(self.meter_action, True)
-        self.status = MeterStatus(json)
+        self.status = MeterStatus(json, self.status)
 
 
 class MeterStatus:
 
-    def __init__(self, response):
+    def __init__(self, response, prev_status):
         self.serial = response['meterSerial']
         self.type = response['type']
         # TODO, use current divider based on firmware version
@@ -234,5 +234,8 @@ class MeterStatus:
         self.phase3_current = response['phase3Current'] / CURRENT_DIVIDER
         current = self.phase1_current + self.phase2_current + self.phase3_current
         self.power = int(round(current * VOLTAGE, -1))
-        self.acc_energy_k = round(response['accEnergy'] / 1000, 1)
+        last_reading = round(response['accEnergy'] / 1000, 1)
+        if prev_status is not None and last_reading - prev_status.acc_energy_k > 500:
+            last_reading = prev_status.acc_energy_k
+        self.acc_energy_k = last_reading
         _LOGGER.debug(self.__dict__)
