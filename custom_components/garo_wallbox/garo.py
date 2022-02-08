@@ -86,7 +86,7 @@ class GaroDevice:
 
     def _request(self, parameter_list):
         pass
-
+    
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         await self._do_update()
@@ -97,7 +97,7 @@ class GaroDevice:
             self._pre_v1_3 = True
             _LOGGER.info('Switching to pre v1.3.1 endpoint')
             response = await self._session.request(method='GET', url=self.__get_url('status', True))
-
+            
 
         response_json = await response.json()
         self._status = GaroStatus(response_json, self._status)
@@ -109,7 +109,7 @@ class GaroDevice:
             self._pre_v1_3 = True
             _LOGGER.info('Switching to pre v1.3.1 endpoint')
             response = await self._session.request(method='GET', url=self.__get_url('config', True))
-
+                
         response_json = await response.json()
         self.info = GaroDeviceInfo(response_json)
 
@@ -226,15 +226,16 @@ class MeterDevice:
 class MeterStatus:
 
     def __init__(self, response, prev_status):
-        last_serial = response['meterSerial']
-        if prev_status is None or last_serial is prev_status.serial:
-            self.serial = last_serial
-            self.type = response['type']
-            # TODO, use current divider based on firmware version
-            self.phase1_current = response['phase1Current'] / CURRENT_DIVIDER
-            self.phase2_current = response['phase2Current'] / CURRENT_DIVIDER
-            self.phase3_current = response['phase3Current'] / CURRENT_DIVIDER
-            current = self.phase1_current + self.phase2_current + self.phase3_current
-            self.power = int(round(current * VOLTAGE, -1))
-            self.acc_energy_k = round(response['accEnergy'] / 1000, 1)
+        self.serial = response['meterSerial']
+        self.type = response['type']
+        # TODO, use current divider based on firmware version
+        self.phase1_current = response['phase1Current'] / CURRENT_DIVIDER
+        self.phase2_current = response['phase2Current'] / CURRENT_DIVIDER
+        self.phase3_current = response['phase3Current'] / CURRENT_DIVIDER
+        current = self.phase1_current + self.phase2_current + self.phase3_current
+        self.power = int(round(current * VOLTAGE, -1))
+        last_reading = round(response['accEnergy'] / 1000, 1)
+        if prev_status is not None and last_reading - prev_status.acc_energy_k > 500:
+            last_reading = prev_status.acc_energy_k
+        self.acc_energy_k = last_reading
         _LOGGER.debug(self.__dict__)
