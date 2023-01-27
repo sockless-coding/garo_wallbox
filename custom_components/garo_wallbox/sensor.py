@@ -32,7 +32,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 async def async_setup_entry(hass, entry, async_add_entities):
     """Set up using config_entry."""
     device = hass.data[GARO_DOMAIN].get(entry.entry_id)
-    async_add_entities([
+
+    sensors = [
         GaroMainSensor(device),
         GaroSensor(device, 'Status', 'status'),
         GaroSensor(device, "Charging Current", 'current_charging_current', 'A'),
@@ -44,7 +45,18 @@ async def async_setup_entry(hass, entry, async_add_entities):
         GaroSensor(device, "Total Energy", 'latest_reading', "Wh"),
         GaroSensor(device, "Total Energy (kWh)", 'latest_reading_k', "kWh"),
         GaroSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
+    ]
+
+    if device.meter:
+        sensors.extend([
+            GaroSensor(device.meter, "Total Energy", 'acc_energy_k', 'kWh'),
+            GaroSensor(device.meter, "Power", 'power', 'W'),
+            GaroSensor(device.meter, "Phase 1 current", 'phase1_current', 'A'),
+            GaroSensor(device.meter, "Phase 2 current", 'phase2_current', 'A'),
+            GaroSensor(device.meter, "Phase 3 current", 'phase3_current', 'A')
         ])
+
+    async_add_entities(sensors, update_before_add=True)
 
     platform = entity_platform.current_platform.get()
 
@@ -118,16 +130,18 @@ class GaroMainSensor(Entity):
         
 
 class GaroSensor(SensorEntity):
-    def __init__(self, device: GaroDevice, name, sensor, unit = None):
+    def __init__(self, device, name, sensor, unit = None):
         """Initialize the sensor."""
         self._device = device
         self._name = f"{device.name} {name}"
         self._sensor = sensor
         self._unit = unit
-        if self._sensor == "latest_reading" or self._sensor == "latest_reading_k":
+        if self._sensor == "latest_reading" or self._sensor == "latest_reading_k" or self._sensor == "acc_energy_k":
             _LOGGER.info(f'Initiating State sensors {self._name}')
             self._attr_state_class = STATE_CLASS_TOTAL_INCREASING #STATE_CLASS_MEASUREMENT
             self._attr_device_class = DEVICE_CLASS_ENERGY
+        if self._sensor == "power":
+            self._attr_device_class = DEVICE_CLASS_POWER
 
 
     @property
@@ -188,6 +202,16 @@ class GaroSensor(SensorEntity):
                 icon = "mdi:record-circle-outline"
             else:
                 icon = "mdi:google-circles-communities"
+        elif self._sensor == "phase1_current":
+            icon = "mdi:flash"
+        elif self._sensor == "phase2_current":
+            icon = "mdi:flash"
+        elif self._sensor == "phase3_current":
+            icon = "mdi:flash"
+        elif self._sensor == "power":
+            icon = "mdi:flash"
+        elif self._sensor == "acc_energy_k":
+            icon = "mdi:flash"
         return icon
 
     @property
