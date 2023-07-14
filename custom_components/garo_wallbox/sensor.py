@@ -240,7 +240,7 @@ class GaroSensor(SensorEntity):
             Status.NOT_CONNECTED: "Vehicle not connected",
             Status.OVERHEAT: "Overtemperature, charging temporarily restricted to 6A",
             Status.RCD_FAULT: "RCD fault",
-            Status.SEARCH_COMM: "Vehicle connected",
+            Status.SEARCH_COMM: "Cable connected",
             Status.VENT_FAULT: "Ventilation required",
             Status.UNAVAILABLE: "Unavailable"
         }
