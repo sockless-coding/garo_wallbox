@@ -4,16 +4,14 @@ import voluptuous as vol
 
 from homeassistant.const import (
     CONF_ICON, 
-    CONF_NAME, 
-    TEMP_CELSIUS)
+    CONF_NAME)
+from homeassistant.util.unit_system import UnitOfTemperature
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import (
-    DEVICE_CLASS_ENERGY,
-    DEVICE_CLASS_POWER,
     PLATFORM_SCHEMA,
-    STATE_CLASS_TOTAL_INCREASING,
-    STATE_CLASS_MEASUREMENT,
     SensorEntity,
+    SensorDeviceClass,
+    SensorStateClass
 )
 from homeassistant.helpers import config_validation as cv, entity_platform, service
 
@@ -43,7 +41,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         GaroSensor(device, "Session Energy", 'acc_session_energy', "Wh"),
         GaroSensor(device, "Total Energy", 'latest_reading', "Wh"),
         GaroSensor(device, "Total Energy (kWh)", 'latest_reading_k', "kWh"),
-        GaroSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
+        GaroSensor(device, "Temperature", 'current_temperature', UnitOfTemperature.CELSIUS.value),
         ])
 
     platform = entity_platform.current_platform.get()
@@ -126,8 +124,13 @@ class GaroSensor(SensorEntity):
         self._unit = unit
         if self._sensor == "latest_reading" or self._sensor == "latest_reading_k":
             _LOGGER.info(f'Initiating State sensors {self._name}')
-            self._attr_state_class = STATE_CLASS_TOTAL_INCREASING #STATE_CLASS_MEASUREMENT
-            self._attr_device_class = DEVICE_CLASS_ENERGY
+            # Update state class and device class based on sensor type
+            if self._sensor == "latest_reading":
+                self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+                self._attr_device_class = SensorDeviceClass.ENERGY
+            elif self._sensor == "latest_reading_k":
+                self._attr_state_class = SensorStateClass.MEASUREMENT
+                self._attr_device_class = SensorDeviceClass.ENERGY
 
 
     @property
