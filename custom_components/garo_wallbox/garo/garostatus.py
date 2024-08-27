@@ -3,6 +3,7 @@ from . import const, utils
 class GaroStatus:
 
     def __init__(self, json = None):
+        self._serial_number = 0
         self._connector = const.Connector.UNKNOWN
         self._mode = const.Mode.Off
         self._current_limit = 0
@@ -26,6 +27,7 @@ class GaroStatus:
         if not json:
             return False
         
+        self._serial_number = json['serialNumber']
         self.connector = utils.read_enum(json,'connector', const.Connector, self._connector)
         self.mode = utils.read_enum(json,'mode', const.Mode, self._mode)
         self.current_limit = utils.read_value(json,'currentLimit', self._current_limit)
@@ -46,6 +48,16 @@ class GaroStatus:
         self._has_changed = False
         return has_changed
     
+    @property
+    def serial_number(self):
+        return self._serial_number
+    @serial_number.setter
+    def serial_number(self, value):
+        if self._serial_number == value:
+            return
+        self._serial_number = value
+        self._has_changed = True
+
     @property
     def connector(self):        
         return self._connector
