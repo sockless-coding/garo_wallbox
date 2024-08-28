@@ -1,15 +1,16 @@
 from . import const, utils
+from .garocharger import GaroCharger
 
 class GaroStatus:
 
     def __init__(self, json = None):
         self._serial_number = 0
         self._connector = const.Connector.UNKNOWN
-        self._mode = const.Mode.Off
+        self._mode = const.Mode.OFF
         self._current_limit = 0
         self._factory_current_limit = 0
         self._switch_current_limit = 0
-        self._power_mode = const.PowerMode.Off
+        self._power_mode = const.PowerMode.OFF
         self._current_charging_current = 0.0
         self._current_charging_power = 0
         self._acc_session_energy = 0
@@ -19,6 +20,8 @@ class GaroStatus:
         self._current_temperature = 0
         self._number_of_phases = 1
         self._pilot_level = 0
+
+        self._main_charger = GaroCharger()
 
         self._has_changed = False        
         self.load(json)
@@ -43,6 +46,9 @@ class GaroStatus:
         self.current_temperature = utils.read_value(json,'currentTemperature', self._current_temperature)
         self.number_of_phases = utils.read_value(json,'nrOfPhases', self._number_of_phases)
         self.pilot_level = utils.read_value(json,'pilotLevel', self._pilot_level)
+
+        if 'mainCharger' in json and self._main_charger.load(json['mainCharger']):
+            self._has_changed = True
 
         has_changed = self._has_changed
         self._has_changed = False
