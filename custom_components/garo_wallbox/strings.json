@@ -1,17 +1,66 @@
 {
-    "config": {
-      "step": {
-        "user": {
-          "title": "Configure Garo Wallbox",
-          "description": "Enter IP address of your Garo Wallbox.",
-          "data": { "host": "Host", "name": "Friendly name" }
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Garo Wallbox",
+        "description": "Enter IP address of your Garo Wallbox.",
+        "data": {
+          "host": "Host",
+          "name": "Friendly name"
+        }
+      }
+    },
+    "abort": {
+      "device_timeout": "Timeout connecting to the device.",
+      "device_fail": "Unexpected error creating device.",
+      "already_configured": "Device is already configured"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "sensor":{
+        "name":"Mode",
+        "state":{
+          "ALWAYS_ON": "Available for charging",
+          "ALWAYS_OFF": "Not available for charging",
+          "SCHEMA": "Schedule"
         }
       },
-      "abort": {
-        "device_timeout": "Timeout connecting to the device.",
-        "device_fail": "Unexpected error creating device.",
-        "already_configured": "Device is already configured"
+      "status": {
+        "name":"Status",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Vehicle not connected",
+          "CONNECTED": "Waiting for startsignal from car",
+          "SEARCH_COMM": "Vehicle not connected",
+          "RCD_FAULT": "RCD fault",
+          "CHARGING": "Charging",
+          "CHARGING_PAUSED": "Charge process paused by loadbalancing system",
+          "CHARGING_FINISHED": "Charging ended by car",
+          "CHARGING_CANCELLED": "Charging cancelled",
+          "DISABLED": "Charging disabled",
+          "OVERHEAT": "Overtemperature, charging temporarily restricted to 6A",
+          "CRITICAL_TEMPERATURE": "Overtemperature, charging cancelled",
+          "INITIALIZATION": "Initialization...",
+          "CABLE_FAULT": "Cable fault",
+          "LOCK_FAULT": "Lock fault",
+          "CONTACTOR_FAULT:": "Contactor fault",
+          "VENT_FAULT": "Ventilation required",
+          "DC_ERROR": "DC fault detected",
+          "DC_HARDWARE":"DC detection error, charging disabled",
+          "CP_FAULT":"CP signal error, charging stopped",
+          "CP_SHORTED":"CP signal shorted, charging stopped",
+          "REMOTE_DISABLED":"Charging externally disabled",
+          "UNAVAILABLE": "Charging paused",
+          "UNKNOWN": "Communication error"
+        }
+      },
+      "nr_of_phases":{
+        "state":{
+          "1": "Single phase",
+          "3": "Three phase"
+        }
       }
     }
   }
-  
+}

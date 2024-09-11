@@ -13,8 +13,8 @@ class GaroStatus:
         self._power_mode = const.PowerMode.OFF
         self._current_charging_current = 0.0
         self._current_charging_power = 0
-        self._acc_session_energy = 0
-        self._acc_session_millis = 0
+        self._accumulated_session_energy = 0
+        self._accumulated_session_millis = 0
         self._latest_reading = 0
         self._charge_status = 0
         self._current_temperature = 0
@@ -22,11 +22,10 @@ class GaroStatus:
         self._pilot_level = 0
 
         self._main_charger = GaroCharger()
-
-        self._has_changed = False        
         self.load(json)
 
     def load(self, json = None) -> bool:
+        self._has_changed = False
         if not json:
             return False
         
@@ -39,8 +38,8 @@ class GaroStatus:
         self.power_mode = utils.read_enum(json,'powerMode', const.PowerMode, self._power_mode)
         self.current_charging_current = utils.read_value(json,'currentChargingCurrent', self._current_charging_current)
         self.current_charging_power = utils.read_value(json,'currentChargingPower', self._current_charging_power)
-        self.acc_session_energy = utils.read_value(json,'accSessionEnergy', self._acc_session_energy)
-        self.acc_session_millis = utils.read_value(json,'accSessionMillis', self._acc_session_millis)
+        self.accumulated_session_energy = utils.read_value(json,'accSessionEnergy', self._accumulated_session_energy)
+        self.accumulated_session_millis = utils.read_value(json,'accSessionMillis', self._accumulated_session_millis)
         self.latest_reading = utils.read_value(json,'latestReading', self._latest_reading)
         self.charge_status = utils.read_value(json,'chargeStatus', self._charge_status)
         self.current_temperature = utils.read_value(json,'currentTemperature', self._current_temperature)
@@ -50,9 +49,11 @@ class GaroStatus:
         if 'mainCharger' in json and self._main_charger.load(json['mainCharger']):
             self._has_changed = True
 
-        has_changed = self._has_changed
-        self._has_changed = False
-        return has_changed
+        return self._has_changed
+    
+    @property
+    def has_changed(self):
+        return self._has_changed
     
     @property
     def serial_number(self):
@@ -148,23 +149,23 @@ class GaroStatus:
         self._has_changed = True
 
     @property
-    def acc_session_energy(self):
-        return self._acc_session_energy
-    @acc_session_energy.setter
-    def acc_session_energy(self, value):
-        if self._acc_session_energy == value:
+    def accumulated_session_energy(self):
+        return self._accumulated_session_energy
+    @accumulated_session_energy.setter
+    def accumulated_session_energy(self, value):
+        if self._accumulated_session_energy == value:
             return
-        self._acc_session_energy = value
+        self._accumulated_session_energy = value
         self._has_changed = True
 
     @property
-    def acc_session_millis(self):
-        return self._acc_session_millis
-    @acc_session_millis.setter
-    def acc_session_millis(self, value):
-        if self._acc_session_millis == value:
+    def accumulated_session_millis(self):
+        return self._accumulated_session_millis
+    @accumulated_session_millis.setter
+    def accumulated_session_millis(self, value):
+        if self._accumulated_session_millis == value:
             return
-        self._acc_session_millis = value
+        self._accumulated_session_millis = value
         self._has_changed = True
 
     @property

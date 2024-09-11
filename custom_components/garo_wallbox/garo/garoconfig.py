@@ -1,4 +1,4 @@
-from . import const, utils
+from . import const, utils, GaroCharger
 
 class GaroConfig:
 
@@ -15,4 +15,6 @@ class GaroConfig:
         self.package_version = utils.read_value(json, 'packageVersion', '0')
         self.twin_serial = utils.read_value(json, 'twinSerial', 0)
         self.standalone = bool(utils.read_value(json,'standalone', 'false'))
+        slaves = utils.read_value(json, 'slaveList', [])
+        self.devices: list[GaroCharger] = [GaroCharger(slave) for slave in slaves]
 

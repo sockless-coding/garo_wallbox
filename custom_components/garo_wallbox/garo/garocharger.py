@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 class GaroCharger:
 
-    def __init__(self):
+    def __init__(self, json = None):
         
         self._is_valid = False
         self._reference	= ''
@@ -31,6 +31,7 @@ class GaroCharger:
         self._min_current_limit = 6
 
         self._has_changed = False
+        self.load(json)
 
     def load(self, json) -> bool:
         if json is None:
