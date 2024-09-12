@@ -18,15 +18,15 @@
   },
   "entity": {
     "sensor": {
-      "sensor":{
-        "state":{
+      "sensor": {
+        "state": {
           "ALWAYS_ON": "Available for charging",
           "ALWAYS_OFF": "Not available for charging",
           "SCHEMA": "Schedule"
         }
       },
       "status": {
-        "name":"Status",
+        "name": "Status",
         "state": {
           "CHANGING": "...",
           "NOT_CONNECTED": "Vehicle not connected",
@@ -46,58 +46,87 @@
           "CONTACTOR_FAULT:": "Contactor fault",
           "VENT_FAULT": "Ventilation required",
           "DC_ERROR": "DC fault detected",
-          "DC_HARDWARE":"DC detection error, charging disabled",
-          "CP_FAULT":"CP signal error, charging stopped",
-          "CP_SHORTED":"CP signal shorted, charging stopped",
-          "REMOTE_DISABLED":"Charging externally disabled",
+          "DC_HARDWARE": "DC detection error, charging disabled",
+          "CP_FAULT": "CP signal error, charging stopped",
+          "CP_SHORTED": "CP signal shorted, charging stopped",
+          "REMOTE_DISABLED": "Charging externally disabled",
           "UNAVAILABLE": "Charging paused",
           "UNKNOWN": "Communication error"
         }
       },
-      "current_charging_current":{
+      "current_charging_current": {
         "name": "Charging Current"
       },
-      "current_charging_power":{
+      "current_charging_power": {
         "name": "Charging Power"
       },
-      "nr_of_phases":{
+      "nr_of_phases": {
         "name": "Number of Phases",
-        "state":{
+        "state": {
           "1": "Single phase",
           "3": "Three phase"
         }
       },
-      "current_limit":{
+      "current_limit": {
         "name": "Current Limit"
       },
-      "pilot_level":{
+      "pilot_level": {
         "name": "Pilot Level"
       },
-      "acc_session_energy":{
-        "name":"Session Energy"
+      "acc_session_energy": {
+        "name": "Session Energy"
       },
-      "latest_reading":{
-        "name":"Total Energy"
+      "latest_reading": {
+        "name": "Total Energy"
       },
-      "latest_reading_k":{
-        "name":"Total Energy (kWh)"
+      "latest_reading_k": {
+        "name": "Total Energy (kWh)"
       },
-      "current_temperature":{
-        "name":"Temperature"
+      "current_temperature": {
+        "name": "Temperature"
       }
     },
-    "select":{
-      "sensor":{
-        "state":{
+    "select": {
+      "sensor": {
+        "state": {
           "ALWAYS_ON": "Available for charging",
           "ALWAYS_OFF": "Not available for charging",
           "SCHEMA": "Schedule"
         }
+      },
+      "outlet": {
+        "name": "Outlet",
+        "state": {
+          "UNLOCKED": "Unlocked",
+          "LOCKED": "Locked",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Locked with power loss unlock"
+        }
+      },
+      "left_outlet": {
+        "name": "Left Outlet",
+        "state": {
+          "UNLOCKED": "Unlocked",
+          "LOCKED": "Locked",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Locked with power loss unlock"
+        }
+      },
+      "right_outlet": {
+        "name": "Right Outlet",
+        "state": {
+          "UNLOCKED": "Unlocked",
+          "LOCKED": "Locked",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Locked with power loss unlock"
+        }
       }
     },
-    "number":{
-      "current_limit":{
-        "name":"Current Limit"
+    "number": {
+      "current_limit": {
+        "name": "Current Limit"
+      }
+    },
+    "switch": {
+      "charge_limit": {
+        "name": "Charge Limiter"
       }
     }
   }

@@ -31,7 +31,7 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=True, kw_only=True)
 class GaroSensorEntityDescription(SensorEntityDescription):
-    """Describes Panasonic sensor entity."""
+    """Describes Garo sensor entity."""
     get_state: Callable[[GaroStatus], Any]
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):

@@ -7,6 +7,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.helpers.entity import DeviceInfo
 
 from .garo import ApiClient, GaroConfig, GaroStatus
+from .garo.const import CableLockMode
 from . import const
 
 _LOGGER = logging.getLogger(__name__)
@@ -59,6 +60,12 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
             sw_version=self._config.package_version
         )
        
+    async def async_enable_charge_limit(self, enable: bool):
+        await self._api_client.async_enable_charge_limit(enable)
+        self._config = await self._api_client.async_get_configuration()
+
+    async def async_set_cable_lock_mode(self, serial_number: int, mode: CableLockMode| str):
+        pass
 
     async def _fetch_device_data(self)->int:
         try:

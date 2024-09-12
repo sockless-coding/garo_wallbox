@@ -56,6 +56,10 @@ class GaroStatus:
         return self._has_changed
     
     @property
+    def main_charger(self):
+        return self._main_charger
+    
+    @property
     def serial_number(self):
         return self._serial_number
     @serial_number.setter

@@ -18,7 +18,7 @@ from .const import DOMAIN,COORDINATOR
 
 @dataclass(frozen=True, kw_only=True)
 class GaroNumberEntityDescription(NumberEntityDescription):
-    """Describes Panasonic Number entity."""
+    """Describes Garo Number entity."""
     get_value: Callable[[GaroStatus], int]
     set_value: Callable[[int], Awaitable]
 

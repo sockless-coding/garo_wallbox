@@ -58,6 +58,13 @@ class ApiClient:
         }]
         response = await self._async_post(self._get_url('config'), data=response_json)
         await response.text()
+
+    async def async_enable_charge_limit(self, enable: bool):
+        response = await self._async_get('config', True)
+        response_json = await response.json()
+        response_json['reducedIntervalsEnabled'] = enable
+        response = await self._async_post(self._get_url('currentlimit'), data=response_json)
+        await response.text()
         
 
     async def _async_get(self, action: str, add_tick = False):

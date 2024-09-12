@@ -10,6 +10,7 @@ class GaroConfig:
         self.firmware_version = utils.read_value(json, 'firmwareVersion', 0)
         self.firmware_revision = utils.read_value(json, 'firmwareRevision', 0)
         self.factory_charge_limit = utils.read_value(json, 'factoryChargeLimit', 0)
+        self.charge_limit_enabled = utils.read_value(json,'reducedIntervalsEnabled', False)
         self.switch_charge_limit = utils.read_value(json,'switchChargeLimit', 0)
         self.software_version = utils.read_value(json,'softwareVersion', 0)
         self.package_version = utils.read_value(json, 'packageVersion', '0')
@@ -17,4 +18,8 @@ class GaroConfig:
         self.standalone = bool(utils.read_value(json,'standalone', 'false'))
         slaves = utils.read_value(json, 'slaveList', [])
         self.devices: list[GaroCharger] = [GaroCharger(slave) for slave in slaves]
+
+    @property
+    def has_twin(self):
+        return self.twin_serial > 0
 
