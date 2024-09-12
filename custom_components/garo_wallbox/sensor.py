@@ -121,6 +121,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 get_state=lambda status: status.accumulated_session_energy,
             ),
             GaroSensorEntityDescription(
+                key="session_time",
+                translation_key="session_time",
+                name="Session Time",
+                icon="mdi:flash-outline",
+                device_class=SensorDeviceClass.DURATION,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement="ms",
+                get_state=lambda status: status.accumulated_session_millis,
+            ),
+            GaroSensorEntityDescription(
                 key="latest_reading",
                 translation_key="latest_reading",
                 name="Total Energy",
