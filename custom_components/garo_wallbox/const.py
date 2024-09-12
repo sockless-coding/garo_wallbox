@@ -13,7 +13,7 @@ SERVICE_SET_MODE = "set_mode"
 SERVICE_SET_CURRENT_LIMIT = "set_current_limit"
 
 COORDINATOR = "coordinator"
-COMPONENT_TYPES = ["sensor"]
+COMPONENT_TYPES = ["sensor","select","number"]
 
 ATTR_MODES = "modes"
 

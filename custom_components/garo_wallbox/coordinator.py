@@ -40,7 +40,14 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
     @property
     def status(self) -> GaroStatus:
         return self._status
+    
+    @property
+    def config(self) -> GaroConfig:
+        return self._config
        
+    @property
+    def main_charger_name(self) -> str:
+        return self._config.devices[0].reference
 
     @property
     def device_info(self)->DeviceInfo:
@@ -48,9 +55,10 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
             identifiers={(const.DOMAIN, str(self._id) )},
             manufacturer="Garo",
             model=self._config.product.name,
-            name=self._config.devices[0].reference,
+            name=self.main_charger_name,
             sw_version=self._config.package_version
         )
+       
 
     async def _fetch_device_data(self)->int:
         try:

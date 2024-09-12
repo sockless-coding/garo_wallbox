@@ -5,6 +5,7 @@ import time
 from .garostatus import GaroStatus
 from .garoconfig import GaroConfig
 from .garocharger import GaroCharger
+from . import const
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,6 +36,29 @@ class ApiClient:
         response = await self._async_get('slaves/false')
         data = await response.json()
         return [GaroCharger(d) for d in data]
+    
+    async def async_set_mode(self, mode: const.Mode | str):
+        if isinstance(mode, str):
+            mode = const.Mode(mode)
+        if self._pre_v1_3:
+            response = await self._async_post(self._get_url('mode'), data=mode.value)
+        else:
+            response = await self._async_post(self._get_url(f'mode/{mode.value}'))
+        await response.text()
+
+    async def async_set_current_limit(self, limit: int):
+        response = await self._async_get('config', True)
+        response_json = await response.json()
+        response_json['reducedCurrentIntervals'] = [{
+            'chargeLimit': str(limit),
+            'schemaId': 1,
+            'start': '00:00:00',
+            'stop':'24:00:00',
+            'weekday': 8
+        }]
+        response = await self._async_post(self._get_url('config'), data=response_json)
+        await response.text()
+        
 
     async def _async_get(self, action: str, add_tick = False):
         response = await self._client.request(method='GET', url=self._get_url(action, add_tick))
@@ -45,6 +69,14 @@ class ApiClient:
         if response.status != 200 and self._pre_v1_3:
             _LOGGER.error('Could not connect to chargebox')
             raise ConnectionError
+        return response
+    
+    async def _async_post(self, url: str, data=None):
+        response = await self._client.request(
+            method='POST', 
+            url=url, 
+            json=data,
+            headers={'content-type': 'application/json; charset=utf-8'})
         return response
 
     def _get_url(self, action, add_tick = False):
