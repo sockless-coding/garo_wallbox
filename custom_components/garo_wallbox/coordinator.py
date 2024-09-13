@@ -65,7 +65,9 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         self._config = await self._api_client.async_get_configuration()
 
     async def async_set_cable_lock_mode(self, serial_number: int, mode: CableLockMode| str):
-        pass
+        if isinstance(mode, str):
+            mode = CableLockMode[mode]
+        await self._api_client.async_set_cable_lock_mode(serial_number, mode)
 
     async def _fetch_device_data(self)->int:
         try:

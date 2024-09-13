@@ -30,8 +30,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             icon="mdi:ev-station",
             options=[opt.value for opt in const.Mode],
             set_option=lambda option: api_client.async_set_mode(option),
-            get_current_option=lambda status: status.mode.value,
-            is_available=lambda: coordinator.config.charge_limit_enabled
+            get_current_option=lambda status: status.mode.value
         ),
     ]
     has_outlet = config.product.has_outlet and (config.firmware_version > 7 or (config.firmware_version == 7 and config.firmware_revision >= 5))

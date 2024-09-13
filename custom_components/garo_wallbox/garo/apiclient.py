@@ -66,6 +66,18 @@ class ApiClient:
         response = await self._async_post(self._get_url('currentlimit'), data=response_json)
         await response.text()
         
+    async def async_set_cable_lock_mode(self, serial_number: int, mode: const.CableLockMode):
+        response = await self._async_get('slaves/false', True)
+        response_json = await response.json()
+        for slave in response_json:
+            if slave['serialNumber'] != serial_number:
+                continue
+            response_json['cableLockMode'] = mode.value
+            response = await self._async_post(self._get_url('cablelock'), data=response_json)
+            await response.text()
+            return
+        raise ValueError('Slave with serial number {} not found'.format(serial_number))
+        
 
     async def _async_get(self, action: str, add_tick = False):
         response = await self._client.request(method='GET', url=self._get_url(action, add_tick))

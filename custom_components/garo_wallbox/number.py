@@ -21,6 +21,7 @@ class GaroNumberEntityDescription(NumberEntityDescription):
     """Describes Garo Number entity."""
     get_value: Callable[[GaroStatus], int]
     set_value: Callable[[int], Awaitable]
+    is_available: Callable[[], bool] | None = None
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     """Set up using config_entry."""
@@ -40,6 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 native_unit_of_measurement="A",
                 get_value=lambda status: status.current_limit,
                 set_value=lambda value: api_client.async_set_current_limit(value),
+                is_available=lambda: coordinator.config.charge_limit_enabled,
             ),
         ]])
 
@@ -52,6 +54,10 @@ class GaroNumberEntity(GaroEntity, NumberEntity):
         self.entity_description = description
         super().__init__(coordinator, entry, description.key)
     
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""        
+        return self.entity_description.is_available() if self.entity_description.is_available else super().available
 
     async def async_set_native_value(self, value: float) -> None:
         """Set new value."""

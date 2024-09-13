@@ -4,26 +4,21 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.const import (
-    CONF_ICON, 
-    CONF_NAME)
+
 from homeassistant.core import HomeAssistant
-from homeassistant.util.unit_system import UnitOfTemperature
-from homeassistant.helpers.entity import Entity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTemperature, EntityCategory
+from homeassistant.const import UnitOfTemperature, UnitOfElectricCurrent, UnitOfEnergy, UnitOfPower, UnitOfTime
 from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
     SensorDeviceClass,
     SensorEntityDescription
 )
-from homeassistant.helpers import config_validation as cv, entity_platform, service
+from homeassistant.helpers import config_validation as cv, entity_platform
 
-from . import DOMAIN as GARO_DOMAIN
 
 from .garo import GaroStatus, const
-from .const import (ATTR_MODES, SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT, DOMAIN, COORDINATOR)
+from .const import (SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT, DOMAIN, COORDINATOR)
 from .coordinator import GaroDeviceCoordinator
 from .base import GaroEntity
 
@@ -34,24 +29,13 @@ class GaroSensorEntityDescription(SensorEntityDescription):
     """Describes Garo sensor entity."""
     get_state: Callable[[GaroStatus], Any]
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    pass
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     """Set up using config_entry."""
     coordinator: GaroDeviceCoordinator = hass.data[DOMAIN][COORDINATOR]
-    async_add_entities([
-        PanasonicSensorEntity(coordinator, entry, description) for description in [
-            GaroSensorEntityDescription(
-                key="sensor",
-                translation_key="sensor",
-                name=coordinator.main_charger_name,
-                options=[opt.value for opt in const.Mode],
-                device_class=SensorDeviceClass.ENUM,
-                state_class=None,
-                get_state=lambda status: status.mode.value,
-            ),
+    entities = [
+        GaroSensorEntity(coordinator, entry, description) for description in [            
             GaroSensorEntityDescription(
                 key="status",
                 translation_key="status",
@@ -68,7 +52,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 icon="mdi:flash",
                 device_class=SensorDeviceClass.CURRENT,
                 state_class=SensorStateClass.MEASUREMENT,
-                native_unit_of_measurement="A",
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
                 get_state=lambda status: status.current_charging_current,
             ),
             GaroSensorEntityDescription(
@@ -78,7 +62,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 icon="mdi:flash",
                 device_class=SensorDeviceClass.POWER,
                 state_class=SensorStateClass.MEASUREMENT,
-                native_unit_of_measurement="W",
+                native_unit_of_measurement=UnitOfPower.WATT,
                 get_state=lambda status: status.current_charging_power,
             ),
             GaroSensorEntityDescription(
@@ -97,7 +81,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 icon="mdi:gauge",
                 device_class=SensorDeviceClass.CURRENT,
                 state_class=SensorStateClass.MEASUREMENT,
-                native_unit_of_measurement="A",
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
                 get_state=lambda status: status.current_limit,
             ),
             GaroSensorEntityDescription(
@@ -107,7 +91,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 icon="mdi:gauge",
                 device_class=SensorDeviceClass.CURRENT,
                 state_class=SensorStateClass.MEASUREMENT,
-                native_unit_of_measurement="A",
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
                 get_state=lambda status: status.pilot_level,
             ),
             GaroSensorEntityDescription(
@@ -117,7 +101,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 icon="mdi:flash-outline",
                 device_class=SensorDeviceClass.ENERGY,
                 state_class=SensorStateClass.TOTAL_INCREASING,
-                native_unit_of_measurement="Wh",
+                native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
                 get_state=lambda status: status.accumulated_session_energy,
             ),
             GaroSensorEntityDescription(
@@ -127,7 +111,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 icon="mdi:flash-outline",
                 device_class=SensorDeviceClass.DURATION,
                 state_class=SensorStateClass.MEASUREMENT,
-                native_unit_of_measurement="ms",
+                native_unit_of_measurement=UnitOfTime.MILLISECONDS,
                 get_state=lambda status: status.accumulated_session_millis,
             ),
             GaroSensorEntityDescription(
@@ -137,7 +121,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 icon="mdi:flash",
                 device_class=SensorDeviceClass.ENERGY,
                 state_class=SensorStateClass.TOTAL_INCREASING,
-                native_unit_of_measurement="Wh",
+                native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
                 get_state=lambda status: status.latest_reading,
             ),
             GaroSensorEntityDescription(
@@ -147,7 +131,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 icon="mdi:flash",
                 device_class=SensorDeviceClass.ENERGY,
                 state_class=SensorStateClass.TOTAL_INCREASING,
-                native_unit_of_measurement="kWh",
+                native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
                 get_state=lambda status: status.latest_reading / 1000 if status.latest_reading else None,
             ),
             GaroSensorEntityDescription(
@@ -157,10 +141,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 icon="mdi:thermometer",
                 device_class=SensorDeviceClass.TEMPERATURE,
                 state_class=SensorStateClass.MEASUREMENT,
-                native_unit_of_measurement="°C",
+                native_unit_of_measurement=UnitOfTemperature.CELSIUS,
                 get_state=lambda status: status.current_temperature,
             )
-        ]])
+        ]]
+    entities.append(
+        GaroLegacySensorEntity(
+            coordinator, 
+            entry, 
+            GaroSensorEntityDescription(
+                key="sensor",
+                translation_key="sensor",
+                name=coordinator.main_charger_name,
+                icon="mdi:car-electric",
+                options=[opt.value for opt in const.Mode],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda status: status.mode.value,
+            )
+        ))
+    
+   
+    async_add_entities(entities)
 
     platform = entity_platform.current_platform.get()
     if platform is not None:
@@ -181,7 +183,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
 
 
-class PanasonicSensorEntity(GaroEntity, SensorEntity):
+class GaroSensorEntity(GaroEntity, SensorEntity):
     
     entity_description: GaroSensorEntityDescription
 
@@ -195,3 +197,10 @@ class PanasonicSensorEntity(GaroEntity, SensorEntity):
         self._attr_native_value = self.entity_description.get_state(self.coordinator.status)
 
 
+class GaroLegacySensorEntity(GaroSensorEntity):
+
+    async def async_set_mode(self, mode):
+        await self.coordinator.api_client.async_set_mode(mode)
+
+    async def async_set_current_limit(self, limit):
+        await self.coordinator.api_client.async_set_current_limit(limit)
