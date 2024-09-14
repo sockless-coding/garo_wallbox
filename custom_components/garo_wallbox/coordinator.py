@@ -28,7 +28,7 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         self._api_client = api_client
         self._id = f"garo_{config.serial_number}"
         self._status: GaroStatus = None
-        self._name = self._config.devices[0].reference if self._config.devices[0].reference else entry.options.get(CONF_NAME, "Charger")
+        self._name = self._config.devices[0].reference if self._config.devices[0].reference else entry.data[CONF_NAME]
 
         self._update_id = 0
 
