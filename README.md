@@ -9,9 +9,9 @@
 This is a custom component to allow control of Garo Wallboxes in [HomeAssistant](https://home-assistant.io).
 
 <p>
-    <img src="https://github.com/sockless-coding/panasonic_cc/raw/master/doc/fixed_controls.png" alt="Example controls" style="vertical-align: top;max-width:100%" align="top" />
-    <img src="https://github.com/sockless-coding/panasonic_cc/raw/master/doc/fixed_sensors.png" alt="Example sensors" style="vertical-align: top;max-width:100%" align="top" />
-    <img src="https://github.com/sockless-coding/panasonic_cc/raw/master/doc/twin_controls.png" alt="Example controls" style="vertical-align: top;max-width:100%" align="top" />
+    <img src="https://github.com/sockless-coding/garo_wallbox/raw/master/doc/fixed_controls.png" alt="Example controls" style="vertical-align: top;max-width:100%" align="top" />
+    <img src="https://github.com/sockless-coding/garo_wallbox/raw/master/doc/fixed_sensors.png" alt="Example sensors" style="vertical-align: top;max-width:100%" align="top" />
+    <img src="https://github.com/sockless-coding/garo_wallbox/raw/master/doc/twin_controls.png" alt="Example controls" style="vertical-align: top;max-width:100%" align="top" />
 </p>
 
 #### Support Development
