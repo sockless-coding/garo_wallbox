@@ -1,251 +1,366 @@
+from typing import Callable, Any
+from dataclasses import dataclass
 import logging
 
 import voluptuous as vol
 
-from homeassistant.const import (
-    CONF_ICON, 
-    CONF_NAME)
-from homeassistant.util.unit_system import UnitOfTemperature
-from homeassistant.helpers.entity import Entity
+
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import UnitOfTemperature, UnitOfElectricCurrent, UnitOfEnergy, UnitOfPower, UnitOfTime
 from homeassistant.components.sensor import (
-    PLATFORM_SCHEMA,
     SensorEntity,
+    SensorStateClass,
     SensorDeviceClass,
-    SensorStateClass
+    SensorEntityDescription
 )
-from homeassistant.helpers import config_validation as cv, entity_platform, service
+from homeassistant.helpers import config_validation as cv, entity_platform
 
-from . import DOMAIN as GARO_DOMAIN
 
-from .garo import GaroDevice, Mode, Status
-from .const import (ATTR_MODES, SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT)
+from .garo import GaroStatus, const
+from .const import (SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT, DOMAIN, COORDINATOR)
+from .coordinator import GaroDeviceCoordinator
+from .base import GaroEntity
+from . import GaroConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
+@dataclass(frozen=True, kw_only=True)
+class GaroSensorEntityDescription(SensorEntityDescription):
+    """Describes Garo sensor entity."""
+    get_state: Callable[[GaroStatus], Any]
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    pass
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_add_entities):
     """Set up using config_entry."""
-    device = hass.data[GARO_DOMAIN].get(entry.entry_id)
-    async_add_entities([
-        GaroMainSensor(device),
-        GaroSensor(device, 'Status', 'status'),
-        GaroSensor(device, "Charging Current", 'current_charging_current', 'A'),
-        GaroSensor(device, "Charging Power", 'current_charging_power', 'W'),
-        GaroSensor(device, "Phases", 'nr_of_phases'),
-        GaroSensor(device, "Current Limit", 'current_limit', 'A'),
-        GaroSensor(device, "Pilot Level", 'pilot_level', 'A'),
-        GaroSensor(device, "Session Energy", 'acc_session_energy', "Wh"),
-        GaroSensor(device, "Total Energy", 'latest_reading', "Wh"),
-        GaroSensor(device, "Total Energy (kWh)", 'latest_reading_k', "kWh"),
-        GaroSensor(device, "Temperature", 'current_temperature', UnitOfTemperature.CELSIUS.value),
+    coordinator = entry.runtime_data.coordinator
+    entities = [
+        GaroSensorEntity(coordinator, entry, description) for description in [            
+            GaroSensorEntityDescription(
+                key="status",
+                translation_key="status",
+                name="Status",
+                options=[opt.value for opt in const.Connector],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda status: status.connector.value,
+            ),
+            GaroSensorEntityDescription(
+                key="current_charging_current",
+                translation_key="current_charging_current",
+                name="Charging Current",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.CURRENT,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                get_state=lambda status: status.current_charging_current,
+            ),
+            GaroSensorEntityDescription(
+                key="current_charging_power",
+                translation_key="current_charging_power",
+                name="Charging Power",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.POWER,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfPower.WATT,
+                get_state=lambda status: status.current_charging_power,
+            ),
+            GaroSensorEntityDescription(
+                key="nr_of_phases",
+                translation_key="nr_of_phases",
+                name="Number of Phases",
+                options=["1", "3"],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda status: str(status.number_of_phases),
+            ),
+            GaroSensorEntityDescription(
+                key="current_limit",
+                translation_key="current_limit",
+                name="Current Limit",
+                icon="mdi:gauge",
+                device_class=SensorDeviceClass.CURRENT,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                get_state=lambda status: status.current_limit,
+            ),
+            GaroSensorEntityDescription(
+                key="pilot_level",
+                translation_key="pilot_level",
+                name="Pilot Level",
+                icon="mdi:gauge",
+                device_class=SensorDeviceClass.CURRENT,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                get_state=lambda status: status.pilot_level,
+            ),
+            GaroSensorEntityDescription(
+                key="acc_session_energy",
+                translation_key="acc_session_energy",
+                name="Session Energy",
+                icon="mdi:flash-outline",
+                device_class=SensorDeviceClass.ENERGY,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+                get_state=lambda status: status.accumulated_session_energy,
+            ),
+            GaroSensorEntityDescription(
+                key="session_time",
+                translation_key="session_time",
+                name="Session Time",
+                icon="mdi:flash-outline",
+                device_class=SensorDeviceClass.DURATION,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfTime.MILLISECONDS,
+                get_state=lambda status: status.accumulated_session_millis,
+            ),
+            GaroSensorEntityDescription(
+                key="latest_reading",
+                translation_key="latest_reading",
+                name="Total Energy",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.ENERGY,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+                get_state=lambda status: status.latest_reading,
+            ),
+            GaroSensorEntityDescription(
+                key="latest_reading_k",
+                translation_key="latest_reading_k",
+                name="Total Energy kWh",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.ENERGY,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+                get_state=lambda status: status.latest_reading / 1000 if status.latest_reading else None,
+            ),
+            GaroSensorEntityDescription(
+                key="current_temperature",
+                translation_key="current_temperature",
+                name="Temperature",
+                icon="mdi:thermometer",
+                device_class=SensorDeviceClass.TEMPERATURE,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+                get_state=lambda status: status.current_temperature,
+            )
+        ]]
+    if (coordinator.config.has_twin):
+        entities.extend(GaroSensorEntity(coordinator, entry, description) for description in [    
+            GaroSensorEntityDescription(
+                key="left_status",
+                translation_key="left_status",
+                name="Left Status",
+                options=[opt.value for opt in const.Connector],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda status: status.main_charger.connector.value,
+            ),
+            GaroSensorEntityDescription(
+                key="left_current_charging_current",
+                translation_key="left_current_charging_current",
+                name="Left Charging Current",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.CURRENT,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                get_state=lambda status: status.main_charger.current_charging_current,
+            ),
+            GaroSensorEntityDescription(
+                key="left_current_charging_power",
+                translation_key="left_current_charging_power",
+                name="Left Charging Power",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.POWER,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfPower.WATT,
+                get_state=lambda status: status.main_charger.current_charging_power,
+            ),
+            GaroSensorEntityDescription(
+                key="left_nr_of_phases",
+                translation_key="left_nr_of_phases",
+                name="Left Number of Phases",
+                options=["1", "3"],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda status: str(status.main_charger.number_of_phases),
+            ),
+            GaroSensorEntityDescription(
+                key="left_pilot_level",
+                translation_key="left_pilot_level",
+                name="Left Pilot Level",
+                icon="mdi:gauge",
+                device_class=SensorDeviceClass.CURRENT,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                get_state=lambda status: status.main_charger.pilot_level,
+            ),
+            GaroSensorEntityDescription(
+                key="left_acc_session_energy",
+                translation_key="left_acc_session_energy",
+                name="Left Session Energy",
+                icon="mdi:flash-outline",
+                device_class=SensorDeviceClass.ENERGY,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+                get_state=lambda status: status.main_charger.accumulated_session_energy,
+            ),
+            GaroSensorEntityDescription(
+                key="left_session_time",
+                translation_key="left_session_time",
+                name="Left Session Time",
+                icon="mdi:flash-outline",
+                device_class=SensorDeviceClass.DURATION,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfTime.MILLISECONDS,
+                get_state=lambda status: status.main_charger.accumulated_session_millis,
+            ),
+            GaroSensorEntityDescription(
+                key="left_acc_energy",
+                translation_key="left_acc_energy",
+                name="Left Energy",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.ENERGY,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+                get_state=lambda status: status.main_charger.accumulated_energy / 1000 if status.main_charger.accumulated_energy else None,
+            ),
+            GaroSensorEntityDescription(
+                key="right_status",
+                translation_key="right_status",
+                name="Right Status",
+                options=[opt.value for opt in const.Connector],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda status: status.twin_charger.connector.value,
+            ),
+            GaroSensorEntityDescription(
+                key="right_current_charging_current",
+                translation_key="right_current_charging_current",
+                name="Right Charging Current",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.CURRENT,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                get_state=lambda status: status.twin_charger.current_charging_current,
+            ),
+            GaroSensorEntityDescription(
+                key="right_current_charging_power",
+                translation_key="right_current_charging_power",
+                name="Right Charging Power",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.POWER,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfPower.WATT,
+                get_state=lambda status: status.twin_charger.current_charging_power,
+            ),
+            GaroSensorEntityDescription(
+                key="right_nr_of_phases",
+                translation_key="right_nr_of_phases",
+                name="Right Number of Phases",
+                options=["1", "3"],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda status: str(status.twin_charger.number_of_phases),
+            ),
+            GaroSensorEntityDescription(
+                key="right_pilot_level",
+                translation_key="right_pilot_level",
+                name="Right Pilot Level",
+                icon="mdi:gauge",
+                device_class=SensorDeviceClass.CURRENT,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                get_state=lambda status: status.twin_charger.pilot_level,
+            ),
+            GaroSensorEntityDescription(
+                key="right_acc_session_energy",
+                translation_key="right_acc_session_energy",
+                name="Right Session Energy",
+                icon="mdi:flash-outline",
+                device_class=SensorDeviceClass.ENERGY,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+                get_state=lambda status: status.twin_charger.accumulated_session_energy,
+            ),
+            GaroSensorEntityDescription(
+                key="right_session_time",
+                translation_key="right_session_time",
+                name="Right Session Time",
+                icon="mdi:flash-outline",
+                device_class=SensorDeviceClass.DURATION,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfTime.MILLISECONDS,
+                get_state=lambda status: status.twin_charger.accumulated_session_millis,
+            ),
+            GaroSensorEntityDescription(
+                key="right_acc_energy",
+                translation_key="right_acc_energy",
+                name="Left Energy",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.ENERGY,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+                get_state=lambda status: status.twin_charger.accumulated_energy / 1000 if status.twin_charger.accumulated_energy else None,
+            ),
         ])
+    entities.append(
+        GaroLegacySensorEntity(
+            coordinator, 
+            entry, 
+            GaroSensorEntityDescription(
+                key="sensor",
+                translation_key="sensor",
+                name=coordinator.main_charger_name,
+                icon="mdi:car-electric",
+                options=[opt.value for opt in const.Mode],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda status: status.mode.value,
+            )
+        ))
+    
+   
+    async_add_entities(entities)
 
     platform = entity_platform.current_platform.get()
+    if platform is not None:
+        platform.async_register_entity_service(
+            SERVICE_SET_MODE,
+            {
+                vol.Required('mode'): cv.string,
+            },
+            "async_set_mode",
+        )
+        platform.async_register_entity_service(
+            SERVICE_SET_CURRENT_LIMIT,
+            {
+                vol.Required('limit'): cv.positive_int,
+            },
+            "async_set_current_limit",
+        )
 
-    platform.async_register_entity_service(
-        SERVICE_SET_MODE,
-        {
-            vol.Required('mode'): cv.string,
-        },
-        "async_set_mode",
-    )
-    platform.async_register_entity_service(
-        SERVICE_SET_CURRENT_LIMIT,
-        {
-            vol.Required('limit'): cv.positive_int,
-        },
-        "async_set_current_limit",
-    )
 
-class GaroMainSensor(Entity):
-    def __init__(self, device: GaroDevice):
-        """Initialize the sensor."""
-        self._device = device
-        self._name = f"{device.name}"
-        self._sensor = "sensor"
 
-    @property
-    def unique_id(self):
-        """Return a unique ID."""
-        return f"{self._device.id}-{self._sensor}"
+class GaroSensorEntity(GaroEntity, SensorEntity):
+    
+    entity_description: GaroSensorEntityDescription
 
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
+    def __init__(self, coordinator: GaroDeviceCoordinator, entry, description: GaroSensorEntityDescription):
+        self.entity_description = description
+        super().__init__(coordinator, entry, description.key)
 
-    @property
-    def icon(self):
-        return "mdi:car-electric"
+  
+    def _async_update_attrs(self) -> None:
+        """Update the attributes of the sensor."""
+        self._attr_native_value = self.entity_description.get_state(self.coordinator.status)
 
-    @property
-    def state(self):
-        """Return the state of the sensor."""
-        return self._device.status.mode.name
 
-    @property
-    def modes(self):
-        return [f.name for f in Mode]
+class GaroLegacySensorEntity(GaroSensorEntity):
 
     async def async_set_mode(self, mode):
-        await self._device.set_mode(Mode[mode])
+        await self.coordinator.api_client.async_set_mode(mode)
 
     async def async_set_current_limit(self, limit):
-        await self._device.set_current_limit(limit)
-
-    async def async_update(self):
-        await self._device.async_update()
-
-    @property
-    def device_info(self):
-        """Return a device description for device registry."""
-        return self._device.device_info
-
-    @property
-    def device_state_attributes(self):
-        attrs = {}
-        try:
-            attrs[ATTR_MODES] = self.modes
-        except KeyError:
-            pass
-        return attrs
-        
-
-class GaroSensor(SensorEntity):
-    def __init__(self, device: GaroDevice, name, sensor, unit = None):
-        """Initialize the sensor."""
-        self._device = device
-        self._name = f"{device.name} {name}"
-        self._sensor = sensor
-        self._unit = unit
-        if self._sensor == "latest_reading" or self._sensor == "latest_reading_k":
-            _LOGGER.info(f'Initiating State sensors {self._name}')
-            # Update state class and device class based on sensor type
-            if self._sensor == "latest_reading":
-                self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-                self._attr_device_class = SensorDeviceClass.ENERGY
-            elif self._sensor == "latest_reading_k":
-                self._attr_state_class = SensorStateClass.MEASUREMENT
-                self._attr_device_class = SensorDeviceClass.ENERGY
-
-
-    @property
-    def unique_id(self):
-        """Return a unique ID."""
-        return f"{self._device.id}-{self._sensor}"
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
-
-    @property
-    def icon(self):
-        """Return the icon of the sensor."""
-        icon = None
-        if self._sensor == "current_temperature":
-            icon = "mdi:thermometer"
-        elif self._sensor == "current_charging_current":
-            icon = "mdi:flash"
-        elif self._sensor == "current_charging_power":
-            icon = "mdi:flash"
-        elif self._sensor == "current_limit":
-            icon = "mdi:flash"
-        elif self._sensor == "pilot_level":
-            icon = "mdi:flash"
-        elif self._sensor == "acc_session_energy":
-            icon = "mdi:flash"
-        elif self._sensor == "latest_reading":            
-            icon = "mdi:flash"
-        elif self._sensor == "latest_reading_k":
-            icon = "mdi:flash"
-        elif self._sensor == "status":
-            switcher = {
-                Status.CABLE_FAULT: "mdi:alert",
-                Status.CHANGING: "mdi:update",
-                Status.CHARGING: "mdi:battery-charging",
-                Status.CHARGING_CANCELLED: "mdi:cancel",
-                Status.CHARGING_FINISHED: "mdi:battery",
-                Status.CHARGING_PAUSED: "mdi:pause",
-                Status.CONNECTED: "mdi:power-plug",
-                Status.CONTACTOR_FAULT: "mdi:alert",
-                Status.DISABLED: "mdi:stop-circle-outline",
-                Status.CRITICAL_TEMPERATURE: "mdi:alert",
-                Status.DC_ERROR: "mdi:alert",
-                Status.INITIALIZATION: "mdi:timer-sand",
-                Status.LOCK_FAULT: "mdi:alert",
-                Status.NOT_CONNECTED: "mdi:power-plug-off",
-                Status.OVERHEAT: "mdi:alert",
-                Status.RCD_FAULT: "mdi:alert",
-                Status.SEARCH_COMM: "mdi:help",
-                Status.VENT_FAULT: "mdi:alert",
-                Status.UNAVAILABLE: "mdi:alert"
-            }
-            icon = switcher.get(self._device.status.status, None)
-        elif self._sensor == "nr_of_phases":
-            if self.state == 1:
-                icon = "mdi:record-circle-outline"
-            else:
-                icon = "mdi:google-circles-communities"
-        return icon
-
-    @property
-    def native_value(self):
-        """Return the state of the sensor."""
-        return round(self.state, 2)
-
-    @property
-    def native_unit_of_measurement(self):
-        """Return the unit the value is expressed in."""
-        return self._unit
-
-    @property
-    def state(self):
-        """Return the state of the sensor."""
-        if self._sensor == 'status':
-            return self.status_as_str()
-
-        return self._device.status.__dict__[self._sensor]
-
-    @property
-    def unit_of_measurement(self):
-        return self._unit
-
-    async def async_update(self):
-        await self._device.async_update()
-
-    @property
-    def device_info(self):
-        """Return a device description for device registry."""
-        return self._device.device_info
-
-    
-
-    def status_as_str(self):
-        switcher = {
-            Status.CABLE_FAULT: "Cable fault",
-            Status.CHANGING: "Changing...",
-            Status.CHARGING: "Charging",
-            Status.CHARGING_CANCELLED: "Charging cancelled",
-            Status.CHARGING_FINISHED: "Charging finished",
-            Status.CHARGING_PAUSED: "Charging paused",
-            Status.DISABLED: "Charging disabled",
-            Status.CONNECTED: "Vehicle connected",
-            Status.CONTACTOR_FAULT: "Contactor fault",
-            Status.CRITICAL_TEMPERATURE: "Overtemperature, charging cancelled",
-            Status.DC_ERROR: "DC error",
-            Status.INITIALIZATION: "Charger starting...",
-            Status.LOCK_FAULT: "Lock fault",
-            Status.NOT_CONNECTED: "Vehicle not connected",
-            Status.OVERHEAT: "Overtemperature, charging temporarily restricted to 6A",
-            Status.RCD_FAULT: "RCD fault",
-            Status.SEARCH_COMM: "Vehicle connected",
-            Status.VENT_FAULT: "Ventilation required",
-            Status.UNAVAILABLE: "Unavailable"
-        }
-        return switcher.get(self._device.status.status, "Unknown")
-
+        await self.coordinator.api_client.async_set_current_limit(limit)

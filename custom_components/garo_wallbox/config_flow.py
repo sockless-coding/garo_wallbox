@@ -2,16 +2,17 @@
 import asyncio
 import logging
 
-from aiohttp import ClientError
+from aiohttp import ClientConnectionError
 from async_timeout import timeout
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_NAME
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .garo import GaroDevice
 
-from .const import KEY_IP, TIMEOUT
+from .const import TIMEOUT
+from .garo import ApiClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,30 +27,28 @@ class FlowHandler(config_entries.ConfigFlow):
         """Register new entry."""
         # Check if ip already is registered
         for entry in self._async_current_entries():
-            if entry.data[KEY_IP] == host:
+            if entry.data[CONF_HOST] == host:
                 return self.async_abort(reason="already_configured")
 
         return self.async_create_entry(title=host, data={CONF_HOST: host, CONF_NAME: name})
 
     async def _create_device(self, host, name):
         """Create device."""
-
+        session = async_get_clientsession(self.hass)
+        api_client = ApiClient(session, host)
         try:
-            device = GaroDevice(
-                host, name, self.hass.helpers.aiohttp_client.async_get_clientsession()
-            )
             with timeout(TIMEOUT):
-                await device.init()
+                await api_client.async_get_configuration()
+            return await self._create_entry(host, name)
         except asyncio.TimeoutError:
+            _LOGGER.debug("Connection to %s timed out", host)
             return self.async_abort(reason="device_timeout")
-        except ClientError:
-            _LOGGER.exception("ClientError")
-            return self.async_abort(reason="device_fail")
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception("Unexpected error creating device")
-            return self.async_abort(reason="device_fail")
-
-        return await self._create_entry(host, name)
+        except ClientConnectionError:
+            _LOGGER.debug("ClientConnectionError to %s", host)
+        except Exception as e:  # pylint: disable=broad-except
+            _LOGGER.error("Unexpected error creating device %s", host, exc_info=e)
+        return self.async_abort(reason="device_fail")
+        
 
     async def async_step_user(self, user_input=None):
         """User initiated config flow."""
@@ -72,4 +71,4 @@ class FlowHandler(config_entries.ConfigFlow):
     async def async_step_discovery(self, user_input):
         """Initialize step from discovery."""
         _LOGGER.info("Discovered device: %s", user_input)
-        return await self._create_entry(user_input[KEY_IP], None)
+        return await self._create_entry(user_input[CONF_HOST], None)
