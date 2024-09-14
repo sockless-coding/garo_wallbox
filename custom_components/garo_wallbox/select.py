@@ -9,6 +9,7 @@ from .garo import GaroStatus, const
 from .coordinator import GaroDeviceCoordinator
 from .base import GaroEntity
 from .const import DOMAIN,COORDINATOR
+from . import GaroConfigEntry
 
 @dataclass(frozen=True, kw_only=True)
 class GaroSelectEntityDescription(SelectEntityDescription):
@@ -17,9 +18,9 @@ class GaroSelectEntityDescription(SelectEntityDescription):
     get_current_option: Callable[[GaroStatus], str]
     is_available: Callable[[], bool] | None = None
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
+async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_add_entities):
     """Set up using config_entry."""
-    coordinator:GaroDeviceCoordinator = hass.data[DOMAIN][COORDINATOR]
+    coordinator = entry.runtime_data.coordinator
     api_client = coordinator.api_client
     config = coordinator.config
     descriptions = [
@@ -33,9 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             get_current_option=lambda status: status.mode.value
         ),
     ]
-    has_outlet = config.product.has_outlet and (config.firmware_version > 7 or (config.firmware_version == 7 and config.firmware_revision >= 5))
-    has_outlet = True
-    if has_outlet:
+    if config.has_outlet:
         descriptions.append(
             GaroSelectEntityDescription(
                 key="left_outlet" if config.has_twin else "outlet",
@@ -54,7 +53,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                     icon="mdi:ev-plug-type2",
                     options=[opt.name for opt in const.CableLockMode],
                     set_option=lambda option: coordinator.async_set_cable_lock_mode(config.twin_serial, option),
-                    get_current_option=lambda status: status.main_charger.cable_lock_mode.name))
+                    get_current_option=lambda status: status.twin_charger.cable_lock_mode.name))
 
     async_add_entities([
         GaroSelectEntity(coordinator, entry, description) for description in descriptions])

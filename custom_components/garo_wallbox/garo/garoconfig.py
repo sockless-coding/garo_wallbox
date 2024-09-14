@@ -22,4 +22,8 @@ class GaroConfig:
     @property
     def has_twin(self):
         return self.twin_serial > 0
+    
+    @property
+    def has_outlet(self):
+        return self.product.has_outlet and (self.firmware_version > 7 or (self.firmware_version == 7 and self.firmware_revision >= 5))
 

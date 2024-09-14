@@ -29,6 +29,64 @@
                     "1":"mdi:record-circle-outline",
                     "3":"mdi:google-circles-communities"
                 }
+            },
+            "left_status": {
+                "state": {
+                    "CHANGING": "mdi:update",
+                    "NOT_CONNECTED": "mdi:power-plug-off",
+                    "CONNECTED": "mdi:power-plug",
+                    "SEARCH_COMM": "mdi:help",
+                    "RCD_FAULT": "mdi:alert",
+                    "CHARGING": "mdi:battery-charging",
+                    "CHARGING_PAUSED": "mdi:pause",
+                    "CHARGING_FINISHED": "mdi:battery",
+                    "CHARGING_CANCELLED": "mdi:cancel",
+                    "DISABLED": "mdi:stop-circle-outline",
+                    "OVERHEAT": "mdi:alert",
+                    "CRITICAL_TEMPERATURE": "mdi:alert",
+                    "INITIALIZATION": "mdi:timer-sand",
+                    "CABLE_FAULT": "mdi:alert",
+                    "LOCK_FAULT": "mdi:alert",
+                    "CONTACTOR_FAULT:": "mdi:alert",
+                    "VENT_FAULT": "mdi:alert",
+                    "DC_ERROR": "mdi:alert",
+                    "UNAVAILABLE": "mdi:alert"
+                }
+            },
+            "left_nr_of_phases":{
+                "state":{
+                    "1":"mdi:record-circle-outline",
+                    "3":"mdi:google-circles-communities"
+                }
+            },
+            "right_status": {
+                "state": {
+                    "CHANGING": "mdi:update",
+                    "NOT_CONNECTED": "mdi:power-plug-off",
+                    "CONNECTED": "mdi:power-plug",
+                    "SEARCH_COMM": "mdi:help",
+                    "RCD_FAULT": "mdi:alert",
+                    "CHARGING": "mdi:battery-charging",
+                    "CHARGING_PAUSED": "mdi:pause",
+                    "CHARGING_FINISHED": "mdi:battery",
+                    "CHARGING_CANCELLED": "mdi:cancel",
+                    "DISABLED": "mdi:stop-circle-outline",
+                    "OVERHEAT": "mdi:alert",
+                    "CRITICAL_TEMPERATURE": "mdi:alert",
+                    "INITIALIZATION": "mdi:timer-sand",
+                    "CABLE_FAULT": "mdi:alert",
+                    "LOCK_FAULT": "mdi:alert",
+                    "CONTACTOR_FAULT:": "mdi:alert",
+                    "VENT_FAULT": "mdi:alert",
+                    "DC_ERROR": "mdi:alert",
+                    "UNAVAILABLE": "mdi:alert"
+                }
+            },
+            "right_nr_of_phases":{
+                "state":{
+                    "1":"mdi:record-circle-outline",
+                    "3":"mdi:google-circles-communities"
+                }
             }
         }
     }

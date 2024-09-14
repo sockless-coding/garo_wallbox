@@ -17,12 +17,12 @@ class GaroCharger:
         self._product_id = 0
         self._charge_status = 0
         self._pilot_level = 0
-        self._accumilated_energy = 0
+        self._accumulated_energy = 0
         self._firmware_version = 0
         self._firmware_revision = 0
         self._connector = const.Connector.UNKNOWN
-        self._accumilated_session_energy = 0
-        self._accumilated_session_millis = 0
+        self._accumulated_session_energy = 0
+        self._accumulated_session_millis = 0
         self._current_charging_current = 0.0
         self._current_charging_power = 0
         self._number_of_phases = 1
@@ -47,12 +47,12 @@ class GaroCharger:
         self.product_id = utils.read_value(json,'productId', self._product_id)
         self.charge_status = utils.read_value(json,'chargeStatus', self._charge_status)
         self.pilot_level = utils.read_value(json,'pilotLevel', self._pilot_level)
-        self.accumilated_energy = utils.read_value(json,'accEnergy', self._accumilated_energy)
+        self.accumulated_energy = utils.read_value(json,'accEnergy', self._accumulated_energy)
         self.firmware_version = utils.read_value(json,'firmwareVersion', self._firmware_version)
         self.firmware_revision = utils.read_value(json,'firmwareRevision', self._firmware_revision)
         self.connector = utils.read_enum(json,'connector', const.Connector, self._connector)
-        self.accumilated_session_energy = utils.read_value(json,'accSessionEnergy', self._accumilated_session_energy)
-        self.accumilated_session_millis = utils.read_value(json,'accSessionMillis', self._accumilated_session_millis)
+        self.accumulated_session_energy = utils.read_value(json,'accSessionEnergy', self._accumulated_session_energy)
+        self.accumulated_session_millis = utils.read_value(json,'accSessionMillis', self._accumulated_session_millis)
         self.current_charging_current = utils.read_value(json,'currentChargingCurrent', self._current_charging_current)
         self.current_charging_power = utils.read_value(json,'currentChargingPower', self._current_charging_power)
         self.number_of_phases = utils.read_value(json,'nrOfPhases', self._number_of_phases)
@@ -151,13 +151,13 @@ class GaroCharger:
         self._has_changed = True
 
     @property
-    def accumilated_energy(self):
-        return self._accumilated_energy
-    @accumilated_energy.setter
-    def accumilated_energy(self, value):
-        if self._accumilated_energy == value:
+    def accumulated_energy(self):
+        return self._accumulated_energy
+    @accumulated_energy.setter
+    def accumulated_energy(self, value):
+        if self._accumulated_energy == value:
             return
-        self._accumilated_energy = value
+        self._accumulated_energy = value
         self._has_changed = True
 
     @property
@@ -191,23 +191,23 @@ class GaroCharger:
         self._has_changed = True
 
     @property
-    def accumilated_session_energy(self):
-        return self._accumilated_session_energy
-    @accumilated_session_energy.setter
-    def accumilated_session_energy(self, value):
-        if self._accumilated_session_energy == value:
+    def accumulated_session_energy(self):
+        return self._accumulated_session_energy
+    @accumulated_session_energy.setter
+    def accumulated_session_energy(self, value):
+        if self._accumulated_session_energy == value:
             return
-        self._accumilated_session_energy = value
+        self._accumulated_session_energy = value
         self._has_changed = True
 
     @property
-    def accumilated_session_millis(self):
-        return self._accumilated_session_millis
-    @accumilated_session_millis.setter
-    def accumilated_session_millis(self, value):
-        if self._accumilated_session_millis == value:
+    def accumulated_session_millis(self):
+        return self._accumulated_session_millis
+    @accumulated_session_millis.setter
+    def accumulated_session_millis(self, value):
+        if self._accumulated_session_millis == value:
             return
-        self._accumilated_session_millis = value
+        self._accumulated_session_millis = value
         self._has_changed = True
 
     @property

@@ -9,6 +9,7 @@ from homeassistant.components.switch import SwitchEntity, SwitchEntityDescriptio
 from .coordinator import GaroDeviceCoordinator
 from .base import GaroEntity
 from .const import DOMAIN,COORDINATOR
+from . import GaroConfigEntry
 
 @dataclass(frozen=True, kw_only=True)
 class GaroSwitchEntityDescription(SwitchEntityDescription):
@@ -18,9 +19,9 @@ class GaroSwitchEntityDescription(SwitchEntityDescription):
     off_func: Callable[[], Awaitable]
     get_state: Callable[[], bool]
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
+async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_add_entities):
     """Set up using config_entry."""
-    coordinator:GaroDeviceCoordinator = hass.data[DOMAIN][COORDINATOR]
+    coordinator = entry.runtime_data.coordinator
     async_add_entities([
         PanasonicSwitchEntity(coordinator, entry, description) for description in [
             GaroSwitchEntityDescription(

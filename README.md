@@ -2,12 +2,17 @@
 
 [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]](LICENSE)
-
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![Integration Usage](https://img.shields.io/badge/dynamic/json?color=41BDF5&style=for-the-badge&logo=home-assistant&label=usage&suffix=%20installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.garo_wallbox.total)](https://analytics.home-assistant.io/)
+
 
 This is a custom component to allow control of Garo Wallboxes in [HomeAssistant](https://home-assistant.io).
 
-![Example entities](https://github.com/sockless-coding/garo_wallbox/raw/master/doc/entities.png)
+<p>
+    <img src="https://github.com/sockless-coding/panasonic_cc/raw/master/doc/fixed_controls.png" alt="Example controls" style="vertical-align: top;max-width:100%" align="top" />
+    <img src="https://github.com/sockless-coding/panasonic_cc/raw/master/doc/fixed_sensors.png" alt="Example sensors" style="vertical-align: top;max-width:100%" align="top" />
+    <img src="https://github.com/sockless-coding/panasonic_cc/raw/master/doc/twin_controls.png" alt="Example controls" style="vertical-align: top;max-width:100%" align="top" />
+</p>
 
 #### Support Development
 - :coffee:&nbsp;&nbsp;[Buy me a coffee](https://www.buymeacoffee.com/sockless)

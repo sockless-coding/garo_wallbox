@@ -15,6 +15,7 @@ from .garo import GaroStatus, const
 from .coordinator import GaroDeviceCoordinator
 from .base import GaroEntity
 from .const import DOMAIN,COORDINATOR
+from . import GaroConfigEntry
 
 @dataclass(frozen=True, kw_only=True)
 class GaroNumberEntityDescription(NumberEntityDescription):
@@ -23,9 +24,9 @@ class GaroNumberEntityDescription(NumberEntityDescription):
     set_value: Callable[[int], Awaitable]
     is_available: Callable[[], bool] | None = None
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
+async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_add_entities):
     """Set up using config_entry."""
-    coordinator:GaroDeviceCoordinator = hass.data[DOMAIN][COORDINATOR]
+    coordinator = entry.runtime_data.coordinator
     api_client = coordinator.api_client
     configuration = coordinator.config
     async_add_entities([

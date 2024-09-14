@@ -84,6 +84,105 @@
       },
       "current_temperature": {
         "name": "Temperature"
+      },
+      "left_status": {
+        "name": "Left Outlet",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Vehicle not connected",
+          "CONNECTED": "Waiting for startsignal from car",
+          "SEARCH_COMM": "Vehicle not connected",
+          "RCD_FAULT": "RCD fault",
+          "CHARGING": "Charging",
+          "CHARGING_PAUSED": "Charge process paused by loadbalancing system",
+          "CHARGING_FINISHED": "Charging ended by car",
+          "CHARGING_CANCELLED": "Charging cancelled",
+          "DISABLED": "Charging disabled",
+          "OVERHEAT": "Overtemperature, charging temporarily restricted to 6A",
+          "CRITICAL_TEMPERATURE": "Overtemperature, charging cancelled",
+          "INITIALIZATION": "Initialization...",
+          "CABLE_FAULT": "Cable fault",
+          "LOCK_FAULT": "Lock fault",
+          "CONTACTOR_FAULT:": "Contactor fault",
+          "VENT_FAULT": "Ventilation required",
+          "DC_ERROR": "DC fault detected",
+          "DC_HARDWARE": "DC detection error, charging disabled",
+          "CP_FAULT": "CP signal error, charging stopped",
+          "CP_SHORTED": "CP signal shorted, charging stopped",
+          "REMOTE_DISABLED": "Charging externally disabled",
+          "UNAVAILABLE": "Charging paused",
+          "UNKNOWN": "Communication error"
+        }
+      },
+      "left_current_charging_current": {
+        "name": "Left Charging Current"
+      },
+      "left_current_charging_power": {
+        "name": "Left Charging Power"
+      },
+      "left_nr_of_phases": {
+        "name": "Left Number of Phases",
+        "state": {
+          "1": "Single phase",
+          "3": "Three phase"
+        }
+      },
+      "left_pilot_level": {
+        "name": "Left Pilot Level"
+      },
+      "left_acc_session_energy": {
+        "name": "Left Session Energy"
+      },
+      "left_acc_energy": {
+        "name": "Left Total Energy"
+      },
+      "right_status": {
+        "name": "Right Outlet",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Vehicle not connected",
+          "CONNECTED": "Waiting for startsignal from car",
+          "SEARCH_COMM": "Vehicle not connected",
+          "RCD_FAULT": "RCD fault",
+          "CHARGING": "Charging",
+          "CHARGING_PAUSED": "Charge process paused by loadbalancing system",
+          "CHARGING_FINISHED": "Charging ended by car",
+          "CHARGING_CANCELLED": "Charging cancelled",
+          "DISABLED": "Charging disabled",
+          "OVERHEAT": "Overtemperature, charging temporarily restricted to 6A",
+          "CRITICAL_TEMPERATURE": "Overtemperature, charging cancelled",
+          "INITIALIZATION": "Initialization...",
+          "CABLE_FAULT": "Cable fault",
+          "LOCK_FAULT": "Lock fault",
+          "CONTACTOR_FAULT:": "Contactor fault",
+          "VENT_FAULT": "Ventilation required",
+          "DC_ERROR": "DC fault detected",
+          "DC_HARDWARE": "DC detection error, charging disabled",
+          "CP_FAULT": "CP signal error, charging stopped",
+          "CP_SHORTED": "CP signal shorted, charging stopped",
+          "REMOTE_DISABLED": "Charging externally disabled",
+          "UNAVAILABLE": "Charging paused",
+          "UNKNOWN": "Communication error"
+        }
+      },
+      "right_current_charging_current": {
+        "name": "Right Charging Current"
+      },
+      "right_current_charging_power": {
+        "name": "Right Charging Power"
+      },
+      "right_nr_of_phases": {
+        "name": "Right Number of Phases",
+        "state": {
+          "1": "Single phase",
+          "3": "Three phase"
+        }
+      },
+      "right_pilot_level": {
+        "name": "Right Pilot Level"
+      },
+      "right_acc_session_energy": {
+        "name": "Right Total Energy"
       }
     },
     "select": {

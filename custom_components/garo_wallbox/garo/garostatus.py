@@ -22,6 +22,7 @@ class GaroStatus:
         self._pilot_level = 0
 
         self._main_charger = GaroCharger()
+        self._twin_charger = GaroCharger()
         self.load(json)
 
     def load(self, json = None) -> bool:
@@ -48,6 +49,8 @@ class GaroStatus:
 
         if 'mainCharger' in json and self._main_charger.load(json['mainCharger']):
             self._has_changed = True
+        if 'twinCharger' in json and self._twin_charger.load(json['twinCharger']):
+            self._has_changed = True
 
         return self._has_changed
     
@@ -58,6 +61,10 @@ class GaroStatus:
     @property
     def main_charger(self):
         return self._main_charger
+    
+    @property
+    def twin_charger(self):
+        return self._twin_charger
     
     @property
     def serial_number(self):

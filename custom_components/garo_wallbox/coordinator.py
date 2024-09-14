@@ -2,6 +2,7 @@ import logging
 
 from datetime import timedelta
 from homeassistant.core import HomeAssistant
+from homeassistant.const import CONF_NAME
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.entity import DeviceInfo
@@ -27,6 +28,7 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         self._api_client = api_client
         self._id = f"garo_{config.serial_number}"
         self._status: GaroStatus = None
+        self._name = self._config.devices[0].reference if self._config.devices[0].reference else entry.options.get(CONF_NAME, "Charger")
 
         self._update_id = 0
 
@@ -48,15 +50,16 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
        
     @property
     def main_charger_name(self) -> str:
-        return self._config.devices[0].reference
+        return self._name
 
     @property
     def device_info(self)->DeviceInfo:
-        return DeviceInfo(
+        return DeviceInfo(            
             identifiers={(const.DOMAIN, str(self._id) )},
             manufacturer="Garo",
             model=self._config.product.name,
             name=self.main_charger_name,
+            serial_number=str(self._config.serial_number),
             sw_version=self._config.package_version
         )
        

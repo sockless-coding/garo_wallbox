@@ -4,6 +4,7 @@ import asyncio
 from datetime import timedelta
 import logging
 from typing import Any, Dict
+from dataclasses import dataclass
 
 from aiohttp import ClientConnectionError
 from async_timeout import timeout
@@ -36,12 +37,20 @@ SCAN_INTERVAL = timedelta(seconds=60)
 
 _LOGGER = logging.getLogger(__name__)
 
+type GaroConfigEntry = ConfigEntry[GaroRuntimeData]
+
+@dataclass
+class GaroRuntimeData:
+    """Runtime data definition."""
+
+    coordinator: GaroDeviceCoordinator
+
 async def async_setup(hass: HomeAssistant, config: Dict) -> bool:
     """Set up the Garo Wallbox component."""
     hass.data.setdefault(DOMAIN, {})
     return True
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
+async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry):
 
     session = async_get_clientsession(hass)
     host = entry.data[CONF_HOST]
@@ -51,7 +60,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
             configuration = await api_client.async_get_configuration()
         coordinator = GaroDeviceCoordinator(hass, entry, api_client, configuration)
         await coordinator.async_config_entry_first_refresh()
-        hass.data[DOMAIN][COORDINATOR] = coordinator
+        entry.runtime_data = GaroRuntimeData(
+            coordinator=coordinator
+        )
+        device_registry = dr.async_get(hass)
+        device_registry.async_get_or_create(
+            config_entry_id=entry.entry_id,
+            identifiers={(DOMAIN, coordinator.device_id)},
+            manufacturer="Garo",
+            model=coordinator.config.product.name,
+            name=coordinator.main_charger_name,
+            serial_number=str(coordinator.config.serial_number),
+            sw_version=coordinator.config.package_version
+        )
         await hass.config_entries.async_forward_entry_setups(entry, COMPONENT_TYPES)
         return True
     except asyncio.TimeoutError:
