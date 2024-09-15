@@ -54,7 +54,12 @@ class ApiClient:
     
     async def async_set_mode(self, mode: const.Mode | str):
         if isinstance(mode, str):
-            mode = const.Mode(mode)
+            if mode.upper() == 'ON':
+                mode = const.Mode.ON
+            elif mode.upper() == 'OFF':
+                mode = const.Mode.OFF
+            else:
+                mode = const.Mode(mode)
         if self._pre_v1_3:
             response = await self._async_post(self._get_url('mode'), data=mode.value)
         else:
