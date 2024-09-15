@@ -1,17 +1,23 @@
 from abc import abstractmethod
 
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.entity import DeviceInfo
 from .coordinator import GaroDeviceCoordinator
+from .garo import GaroCharger
 
 class GaroEntity(CoordinatorEntity[GaroDeviceCoordinator]):
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator: GaroDeviceCoordinator, config_entry, key: str) -> None:
+    def __init__(self, coordinator: GaroDeviceCoordinator, config_entry, key: str, charger: GaroCharger | None = None) -> None:
         super().__init__(coordinator)
         self.config_entry = config_entry
         self._attr_translation_key = key
-        self._attr_unique_id = f"{coordinator.device_id}-{key}"
-        self._attr_device_info = self.coordinator.device_info
+        if charger is not None:
+            self._attr_unique_id = f"charger_{charger.serial_number}-{key}"
+            self._attr_device_info = coordinator.get_charger_device_info(charger)
+        else:
+            self._attr_unique_id = f"{coordinator.device_id}-{key}"
+            self._attr_device_info = self.coordinator.device_info
         self._async_update_attrs()
 
     

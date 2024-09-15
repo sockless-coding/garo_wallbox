@@ -17,7 +17,7 @@ from homeassistant.components.sensor import (
 from homeassistant.helpers import config_validation as cv, entity_platform
 
 
-from .garo import GaroStatus, const
+from .garo import GaroStatus, const, GaroCharger
 from .const import (SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT, DOMAIN, COORDINATOR)
 from .coordinator import GaroDeviceCoordinator
 from .base import GaroEntity
@@ -30,12 +30,16 @@ class GaroSensorEntityDescription(SensorEntityDescription):
     """Describes Garo sensor entity."""
     get_state: Callable[[GaroStatus], Any]
 
+@dataclass(frozen=True, kw_only=True)
+class GaroChargerSensorEntityDescription(SensorEntityDescription):
+    """Describes Garo sensor entity."""
+    get_state: Callable[[GaroCharger], Any]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_add_entities):
     """Set up using config_entry."""
     coordinator = entry.runtime_data.coordinator
-    entities = [
+    entities:list[SensorEntity] = [
         GaroSensorEntity(coordinator, entry, description) for description in [            
             GaroSensorEntityDescription(
                 key="status",
@@ -321,6 +325,92 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
             )
         ))
     
+    def add_charger_entities(charger: GaroCharger):
+        entities.extend(GaroChargerSensorEntity(coordinator, entry, description, charger) for description in [    
+            GaroChargerSensorEntityDescription(
+                key="status",
+                translation_key="status",
+                name="Status",
+                options=[opt.value for opt in const.Connector],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda charger: charger.connector.value,
+            ),
+            GaroChargerSensorEntityDescription(
+                key="current_charging_current",
+                translation_key="current_charging_current",
+                name="Charging Current",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.CURRENT,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                get_state=lambda charger: charger.current_charging_current,
+            ),
+            GaroChargerSensorEntityDescription(
+                key="current_charging_power",
+                translation_key="current_charging_power",
+                name="Charging Power",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.POWER,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfPower.WATT,
+                get_state=lambda charger: charger.current_charging_power,
+            ),
+            GaroChargerSensorEntityDescription(
+                key="nr_of_phases",
+                translation_key="nr_of_phases",
+                name="Number of Phases",
+                options=["1", "3"],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda charger: str(charger.number_of_phases),
+            ),
+            GaroChargerSensorEntityDescription(
+                key="pilot_level",
+                translation_key="pilot_level",
+                name="Pilot Level",
+                icon="mdi:gauge",
+                device_class=SensorDeviceClass.CURRENT,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                get_state=lambda charger: charger.pilot_level,
+            ),
+            GaroChargerSensorEntityDescription(
+                key="acc_session_energy",
+                translation_key="acc_session_energy",
+                name="Session Energy",
+                icon="mdi:flash-outline",
+                device_class=SensorDeviceClass.ENERGY,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+                get_state=lambda charger: charger.accumulated_session_energy,
+            ),
+            GaroChargerSensorEntityDescription(
+                key="session_time",
+                translation_key="session_time",
+                name="Session Time",
+                icon="mdi:flash-outline",
+                device_class=SensorDeviceClass.DURATION,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UnitOfTime.MILLISECONDS,
+                get_state=lambda charger: charger.accumulated_session_millis,
+            ),
+            GaroChargerSensorEntityDescription(
+                key="acc_energy",
+                translation_key="acc_energy",
+                name="Total Energy",
+                icon="mdi:flash",
+                device_class=SensorDeviceClass.ENERGY,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+                get_state=lambda charger: charger.accumulated_energy / 1000 if charger.accumulated_energy else None,
+            )
+        ])
+
+    if coordinator.config.has_slaves:
+        for slave in coordinator.slaves:
+            add_charger_entities(slave)
+
    
     async_add_entities(entities)
 
@@ -355,6 +445,20 @@ class GaroSensorEntity(GaroEntity, SensorEntity):
     def _async_update_attrs(self) -> None:
         """Update the attributes of the sensor."""
         self._attr_native_value = self.entity_description.get_state(self.coordinator.status)
+
+class GaroChargerSensorEntity(GaroEntity, SensorEntity):
+    
+    entity_description: GaroChargerSensorEntityDescription
+
+    def __init__(self, coordinator: GaroDeviceCoordinator, entry, description: GaroChargerSensorEntityDescription, charger: GaroCharger):
+        self.entity_description = description
+        self._charger = charger
+        super().__init__(coordinator, entry, description.key, charger)
+
+  
+    def _async_update_attrs(self) -> None:
+        """Update the attributes of the sensor."""
+        self._attr_native_value = self.entity_description.get_state(self._charger)
 
 
 class GaroLegacySensorEntity(GaroSensorEntity):

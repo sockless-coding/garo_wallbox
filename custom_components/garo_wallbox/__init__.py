@@ -73,6 +73,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry):
             serial_number=str(coordinator.config.serial_number),
             sw_version=coordinator.config.package_version
         )
+        if configuration.has_slaves:
+            for slave in coordinator.slaves:
+                slave_charger = coordinator.get_charger_device_info(slave)
+                device_registry.async_get_or_create(
+                    config_entry_id=entry.entry_id,
+                    identifiers=slave_charger.get("identifiers"),
+                    manufacturer="Garo")
+
         await hass.config_entries.async_forward_entry_setups(entry, COMPONENT_TYPES)
         return True
     except asyncio.TimeoutError:

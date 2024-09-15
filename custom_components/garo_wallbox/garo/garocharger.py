@@ -37,7 +37,7 @@ class GaroCharger:
         if json is None:
             return False
         self._is_valid = True
-        
+        self._has_changed = False
 
         self.reference = utils.read_value(json,'reference', self._reference)
         self.serial_number = utils.read_value(json,'serialNumber', self._serial_number)
@@ -59,16 +59,16 @@ class GaroCharger:
         self.twin_serial = utils.read_value(json,'twinSerial', self._twin_serial)
         self.cable_lock_mode = utils.read_enum(json,'cableLockMode', const.CableLockMode, self._cable_lock_mode)
         self.min_current_limit = utils.read_value(json,'minCurrentLimit', self._min_current_limit)
-
-
-
-        has_changed = self._has_changed
-        self._has_changed = False
-        return has_changed
+        
+        return self._has_changed
 
     @property
     def is_valid(self):
         return self._is_valid
+    
+    @property
+    def has_changed(self):
+        return self._is_valid and self._has_changed
     
     @property
     def reference(self) -> str:

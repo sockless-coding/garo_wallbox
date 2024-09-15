@@ -17,11 +17,37 @@ class GaroConfig:
         self.twin_serial = utils.read_value(json, 'twinSerial', 0)
         self.standalone = bool(utils.read_value(json,'standalone', 'false'))
         slaves = utils.read_value(json, 'slaveList', [])
-        self.devices: list[GaroCharger] = [GaroCharger(slave) for slave in slaves]
+        self._master_charger: GaroCharger
+        self._twin_charger: GaroCharger | None = None
+        self._slaves: list[GaroCharger] = []
+        for charger in [GaroCharger(slave) for slave in slaves]:
+            if charger.serial_number == self.serial_number:
+                self._master_charger = charger
+                continue
+            if charger.serial_number == self.twin_serial:
+                self._twin_charger = charger
+                continue
+            self._slaves.append(charger)
+        
+    @property
+    def master_charger(self) -> GaroCharger:
+        return self._master_charger
+    
+    @property
+    def twin_charger(self) -> GaroCharger | None:
+        return self._twin_charger
+    
+    @property
+    def slaves(self) -> list[GaroCharger]:
+        return self._slaves
 
     @property
     def has_twin(self):
         return self.twin_serial > 0
+    
+    @property
+    def has_slaves(self):
+        return len(self._slaves) > 0
     
     @property
     def has_outlet(self):

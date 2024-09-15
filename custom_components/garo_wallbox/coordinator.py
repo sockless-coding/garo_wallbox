@@ -7,8 +7,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.entity import DeviceInfo
 
-from .garo import ApiClient, GaroConfig, GaroStatus
-from .garo.const import CableLockMode
+from .garo import ApiClient, GaroConfig, GaroStatus, GaroCharger
+from .garo.const import CableLockMode, PRODUCT_MAP, GaroProductInfo
 from . import const
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,7 +28,8 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         self._api_client = api_client
         self._id = f"garo_{config.serial_number}"
         self._status: GaroStatus = None
-        self._name = self._config.devices[0].reference if self._config.devices[0].reference else entry.data[CONF_NAME]
+        self._name = self._config.master_charger.reference or entry.data[CONF_NAME]
+        self._slaves = self._config.slaves
 
         self._update_id = 0
 
@@ -53,6 +54,11 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         return self._name
 
     @property
+    def slaves(self) -> list[GaroCharger]:        
+        return [slave for slave in self._slaves if slave.serial_number != self._config.serial_number and slave.serial_number != self._config.twin_serial]
+
+
+    @property
     def device_info(self)->DeviceInfo:
         return DeviceInfo(            
             identifiers={(const.DOMAIN, str(self._id) )},
@@ -60,8 +66,27 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
             model=self._config.product.name,
             name=self.main_charger_name,
             serial_number=str(self._config.serial_number),
-            sw_version=self._config.package_version
+            sw_version=self._config.package_version,
+            hw_version=f"{self._config.firmware_version}.{self._config.firmware_revision}"
         )
+    
+    def get_charger_device_info(self, charger: GaroCharger)->DeviceInfo:
+        product = self.get_product_info(charger)
+        return DeviceInfo(            
+            identifiers={(const.DOMAIN, f"garo_charger_{charger.serial_number}" )},
+            manufacturer="Garo",
+            model=product.name,
+            name=charger.reference if charger.reference else f"Charger {charger.serial_number}",
+            serial_number=str(charger.serial_number),
+            sw_version=self._config.package_version,
+            hw_version=f"{charger.firmware_version}.{charger.firmware_revision}"
+        )
+    
+    def get_product_info(self, charger: GaroCharger)->GaroProductInfo:
+        product_id = self._config.product_id if charger.serial_number == self._config.master_charger.serial_number else charger.product_id
+        return PRODUCT_MAP[product_id] if product_id in PRODUCT_MAP else GaroProductInfo('Unknown')
+
+
        
     async def async_enable_charge_limit(self, enable: bool):
         await self._api_client.async_enable_charge_limit(enable)
@@ -75,7 +100,14 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
     async def _fetch_device_data(self)->int:
         try:
             self._status = await self._api_client.async_get_status(self._status)
-            if self._status.has_changed:
+            has_changed = self._status.has_changed
+            if (self._config.has_slaves):
+                await self._api_client.async_get_slaves(self._slaves)
+                for slave in self._slaves:
+                    if slave.has_changed:
+                        has_changed = True
+                        break
+            if has_changed:
                 self._update_id += 1
         except BaseException as e:
             _LOGGER.error("Error fetching device data from API: %s", e, exc_info=e)

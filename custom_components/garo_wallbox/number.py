@@ -58,7 +58,7 @@ class GaroNumberEntity(GaroEntity, NumberEntity):
     @property
     def available(self) -> bool:
         """Return if entity is available."""        
-        return self.entity_description.is_available() if self.entity_description.is_available else super().available
+        return self.entity_description.is_available() and super().available if self.entity_description.is_available else super().available
 
     async def async_set_native_value(self, value: float) -> None:
         """Set new value."""

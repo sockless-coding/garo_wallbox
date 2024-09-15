@@ -32,10 +32,25 @@ class ApiClient:
         data = await response.json()
         return GaroConfig(data)
     
-    async def async_get_slaves(self) -> list[GaroCharger]:
+    async def async_get_slaves(self, slaves: list[GaroCharger] | None = None) -> list[GaroCharger]:
         response = await self._async_get('slaves/false')
         data = await response.json()
-        return [GaroCharger(d) for d in data]
+        if not slaves:
+            slaves = []
+        for d in data:
+            if 'serialNumber' not in d:
+                continue
+            serial_number = d['serialNumber']
+            has_found = False
+            for s in slaves:
+                if s.serial_number == serial_number:
+                    s.load(d)
+                    has_found = True
+                    break
+            if not has_found:
+                slaves.append(GaroCharger(d))
+        return slaves
+        
     
     async def async_set_mode(self, mode: const.Mode | str):
         if isinstance(mode, str):

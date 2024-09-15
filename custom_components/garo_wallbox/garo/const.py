@@ -36,6 +36,7 @@ class PowerMode(Enum):
     ON = 'ON'
     OFF  = 'OFF'
     UNKNOWN = 'UNKNOWN'
+    UNAVAILABLE = 'UNAVAILABLE'
 
 class CableLockMode(Enum):
     UNLOCKED = 0
