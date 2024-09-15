@@ -92,8 +92,8 @@ class ApiClient:
         for slave in response_json:
             if slave['serialNumber'] != serial_number:
                 continue
-            response_json['cableLockMode'] = mode.value
-            response = await self._async_post(self._get_url('cablelock'), data=response_json)
+            slave['cableLockMode'] = mode.value
+            response = await self._async_post(self._get_url('cablelock'), data=slave)
             await response.text()
             return
         raise ValueError('Slave with serial number {} not found'.format(serial_number))
