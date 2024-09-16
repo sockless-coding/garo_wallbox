@@ -40,8 +40,8 @@ class PowerMode(Enum):
 
 class CableLockMode(Enum):
     UNLOCKED = 0
-    LOCKED = 1
-    LOCKED_WITH_POWER_LOSS_UNLOCK = 2
+    LOCKED = 2
+    LOCKED_WITH_POWER_LOSS_UNLOCK = 1
 
 class GaroProductInfo:
     def __init__(self, name: str, has_meter: bool = False, is_3_phase: bool = False, has_outlet: bool = False):
