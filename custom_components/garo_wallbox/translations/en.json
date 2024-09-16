@@ -6,7 +6,9 @@
         "description": "Enter IP address of your Garo Wallbox.",
         "data": {
           "host": "Host",
-          "name": "Friendly name"
+          "name": "Friendly name",
+          "device_fetch_interval": "Fetch interval (seconds)",
+          "meter_fetch_interval": "Meter fetch interval (seconds)"
         }
       }
     },
@@ -14,6 +16,18 @@
       "device_timeout": "Timeout connecting to the device.",
       "device_fail": "Unexpected error creating device.",
       "already_configured": "Device is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "host": "Host",
+          "name": "Friendly name",
+          "device_fetch_interval": "Fetch interval (seconds)",
+          "meter_fetch_interval": "Meter fetch interval (seconds)"
+        }
+      }
     }
   },
   "entity": {
