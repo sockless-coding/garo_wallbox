@@ -301,7 +301,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
             GaroSensorEntityDescription(
                 key="right_acc_energy",
                 translation_key="right_acc_energy",
-                name="Left Energy",
+                name="Right Energy",
                 icon="mdi:flash",
                 device_class=SensorDeviceClass.ENERGY,
                 state_class=SensorStateClass.TOTAL_INCREASING,
