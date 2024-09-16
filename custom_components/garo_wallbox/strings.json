@@ -182,6 +182,9 @@
         "name": "Right Pilot Level"
       },
       "right_acc_session_energy": {
+        "name": "Right Session Energy"
+      },
+      "right_acc_energy": {
         "name": "Right Total Energy"
       }
     },
