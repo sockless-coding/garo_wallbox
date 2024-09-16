@@ -5,6 +5,7 @@ import time
 from .garostatus import GaroStatus
 from .garoconfig import GaroConfig
 from .garocharger import GaroCharger
+from .garometer import GaroMeter
 from . import const
 
 _LOGGER = logging.getLogger(__name__)
@@ -17,6 +18,11 @@ class ApiClient:
         self._client = client
         self._host = host
         self._pre_v1_3 = False
+        self._configuration: GaroConfig | None = None
+        self._has_meter_info = False
+        self._current_divider = 1
+        self._power_divider = 1
+
 
     async def async_get_status(self, status: GaroStatus | None = None):
         response = await self._async_get('status')
@@ -30,7 +36,8 @@ class ApiClient:
     async def async_get_configuration(self):
         response = await self._async_get('config')
         data = await response.json()
-        return GaroConfig(data)
+        self._configuration = GaroConfig(data)
+        return self._configuration
     
     async def async_get_slaves(self, slaves: list[GaroCharger] | None = None) -> list[GaroCharger]:
         response = await self._async_get('slaves/false')
@@ -50,6 +57,26 @@ class ApiClient:
             if not has_found:
                 slaves.append(GaroCharger(d))
         return slaves
+    
+    async def async_get_external_meter(self, meter: GaroMeter | None = None) -> GaroMeter:        
+        return await self._async_get_meter('meterinfo/EXTERNAL', meter)
+    
+    async def async_get_central100_meter(self, meter: GaroMeter | None = None) -> GaroMeter:
+        return await self._async_get_meter('meterinfo/CENTRAL100', meter)
+    
+    async def async_get_central101_meter(self, meter: GaroMeter | None = None) -> GaroMeter:
+        return await self._async_get_meter('meterinfo/CENTRAL101', meter)
+    
+    async def _async_get_meter(self, endpoint:str, meter: GaroMeter | None = None) -> GaroMeter:
+        await self._async_load_meter_info()
+        response = await self._async_get(endpoint)
+        data = await response.json()
+        if meter is None:
+            meter = GaroMeter(data, self._current_divider, self._power_divider)
+        else:
+            meter.load(data)
+        return meter
+		
         
     
     async def async_set_mode(self, mode: const.Mode | str):
@@ -123,4 +150,18 @@ class ApiClient:
         if self._pre_v1_3:
             return f'http://{self._host}:2222/rest/chargebox/{action}{tick}'
         return f'http://{self._host}:8080/servlet/rest/chargebox/{action}{tick}'
+    
+    async def _async_load_meter_info(self):
+        if self._has_meter_info:
+            return
+        config = self._configuration or await self.async_get_configuration()
+        self._current_divider = 1
+        self._power_divider = 1
+		
+        if config.firmware_version == 2 and config.firmware_revision <= 12:
+            self._current_divider = 1000
+            self._power_divider = 1000
+        elif (config.firmware_version == 2 and config.firmware_revision >= 13) or config.firmware_version > 7 or (config.firmware_version == 7 and config.firmware_revision >= 7):
+            self._current_divider = 10
+        self._has_meter_info = True
         

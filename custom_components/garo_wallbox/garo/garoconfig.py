@@ -16,6 +16,11 @@ class GaroConfig:
         self.package_version = utils.read_value(json, 'packageVersion', '0')
         self.twin_serial = utils.read_value(json, 'twinSerial', 0)
         self.standalone = bool(utils.read_value(json,'standalone', 'false'))
+        self.local_load_balanced = bool(utils.read_value(json,'localLoadBalanced', 'false'))
+        self.group_load_balanced = bool(utils.read_value(json,'groupLoadBalanced', 'false'))
+        self.group_load_balanced101 = bool(utils.read_value(json,'groupLoadBalanced101', 'false'))
+
+
         slaves = utils.read_value(json, 'slaveList', [])
         self._master_charger: GaroCharger
         self._twin_charger: GaroCharger | None = None
@@ -52,4 +57,8 @@ class GaroConfig:
     @property
     def has_outlet(self):
         return self.product.has_outlet and (self.firmware_version > 7 or (self.firmware_version == 7 and self.firmware_revision >= 5))
+    
+    @property
+    def has_load_balancer(self):
+        return self.local_load_balanced or self.group_load_balanced or self.group_load_balanced101
 

@@ -24,7 +24,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .garo import ApiClient, GaroConfig
-from .coordinator import GaroDeviceCoordinator
+from .coordinator import GaroDeviceCoordinator, GaroMeterCoordinator
 from .const import (
     DOMAIN,
     TIMEOUT,
@@ -44,6 +44,7 @@ class GaroRuntimeData:
     """Runtime data definition."""
 
     coordinator: GaroDeviceCoordinator
+    meter_coordinator: GaroMeterCoordinator | None
 
 async def async_setup(hass: HomeAssistant, config: Dict) -> bool:
     """Set up the Garo Wallbox component."""
@@ -60,8 +61,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry):
             configuration = await api_client.async_get_configuration()
         coordinator = GaroDeviceCoordinator(hass, entry, api_client, configuration)
         await coordinator.async_config_entry_first_refresh()
+        meter_coordinator: GaroMeterCoordinator | None = None
+        if configuration.has_load_balancer:
+            meter_coordinator = GaroMeterCoordinator(hass, entry, api_client, configuration)
+            await meter_coordinator.async_config_entry_first_refresh()
         entry.runtime_data = GaroRuntimeData(
-            coordinator=coordinator
+            coordinator=coordinator,
+            meter_coordinator=meter_coordinator 
         )
         device_registry = dr.async_get(hass)
         device_registry.async_get_or_create(
@@ -79,6 +85,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry):
                 device_registry.async_get_or_create(
                     config_entry_id=entry.entry_id,
                     identifiers=slave_charger.get("identifiers"),
+                    manufacturer="Garo")
+                
+        if configuration.has_load_balancer and meter_coordinator is not None:
+            if meter_coordinator.has_external_meter:
+                device_registry.async_get_or_create(
+                    config_entry_id=entry.entry_id,
+                    identifiers=meter_coordinator.get_device_info(meter_coordinator.external_meter).get("identifiers"),
+                    manufacturer="Garo")
+            if meter_coordinator.has_central100_meter:
+                device_registry.async_get_or_create(
+                    config_entry_id=entry.entry_id,
+                    identifiers=meter_coordinator.get_device_info(meter_coordinator.central100_meter).get("identifiers"),
+                    manufacturer="Garo")
+            if meter_coordinator.has_central101_meter:
+                device_registry.async_get_or_create(
+                    config_entry_id=entry.entry_id,
+                    identifiers=meter_coordinator.get_device_info(meter_coordinator.central101_meter).get("identifiers"),
                     manufacturer="Garo")
 
         await hass.config_entries.async_forward_entry_setups(entry, COMPONENT_TYPES)
