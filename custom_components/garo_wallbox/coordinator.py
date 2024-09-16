@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.entity import DeviceInfo
 
-from .garo import ApiClient, GaroConfig, GaroStatus, GaroCharger
+from .garo import ApiClient, GaroConfig, GaroStatus, GaroCharger, GaroMeter
 from .garo.const import CableLockMode, PRODUCT_MAP, GaroProductInfo
 from . import const
 
@@ -27,7 +27,7 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         self._config = config
         self._api_client = api_client
         self._id = f"garo_{config.serial_number}"
-        self._status: GaroStatus = None
+        self._status: GaroStatus | None = None
         self._name = self._config.master_charger.reference or entry.data[CONF_NAME]
         self._slaves = self._config.slaves
 
@@ -43,6 +43,8 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
     
     @property
     def status(self) -> GaroStatus:
+        if not self._status:
+            raise ValueError("Status is not initialized")
         return self._status
     
     @property
@@ -111,5 +113,84 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
                 self._update_id += 1
         except BaseException as e:
             _LOGGER.error("Error fetching device data from API: %s", e, exc_info=e)
+            raise UpdateFailed(f"Invalid response from API: {e}") from e
+        return self._update_id
+    
+class GaroMeterCoordinator(DataUpdateCoordinator[int]):
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, api_client: ApiClient, config: GaroConfig) -> None:
+        super().__init__(
+            hass,
+            _LOGGER,
+            name="Garo Meter Coordinator",
+            update_interval=timedelta(seconds=entry.options.get(const.CONF_METER_FETCH_INTERVAL, const.DEFAULT_METER_FETCH_INTERVAL)),
+            update_method=self._fetch_device_data,
+        )
+        self._hass = hass
+        self._entry = entry
+        self._config = config
+        self._api_client = api_client
+        self._external_meter: GaroMeter | None = None
+        self._central100_meter: GaroMeter | None = None
+        self._central101_meter: GaroMeter | None = None
+
+        self._update_id = 0
+
+    @property
+    def has_external_meter(self) -> bool:
+        return self._external_meter is not None
+    @property
+    def external_meter(self)->GaroMeter:
+        if not self._external_meter:
+            raise ValueError("External meter not initialized")
+        return self._external_meter
+    
+    @property
+    def has_central100_meter(self) -> bool:
+        return self._central100_meter is not None
+    @property
+    def central100_meter(self)->GaroMeter:
+        if not self._central100_meter:
+            raise ValueError("Central 100 meter not initialized")
+        return self._central100_meter
+    
+    @property
+    def has_central101_meter(self) -> bool:
+        return self._central101_meter is not None
+    @property
+    def central101_meter(self)->GaroMeter:
+        if not self._central101_meter:
+            raise ValueError("Central 101 meter not initialized")
+        return self._central101_meter
+    
+    def get_device_info(self, meter: GaroMeter)->DeviceInfo:
+        
+        return DeviceInfo(            
+            identifiers={(const.DOMAIN, f"garo_meter_{meter.serial_number}" )},
+            manufacturer="Garo",
+            name=f"Energy meter ({meter.serial_number})",
+            model=f"Type {meter.type}",
+            serial_number=str(meter.serial_number),
+        )
+
+    async def _fetch_device_data(self)->int:
+        try:
+            has_changed = False
+            if self._config.local_load_balanced:
+                self._external_meter = await self._api_client.async_get_external_meter(self._external_meter)
+                if self._external_meter.has_changed:
+                    has_changed = True
+            if self._config.group_load_balanced:
+                self._central100_meter = await self._api_client.async_get_central100_meter(self._central100_meter)
+                if self._central100_meter.has_changed:
+                    has_changed = True
+            if self._config.group_load_balanced101:
+                self._central101_meter = await self._api_client.async_get_central101_meter(self._central101_meter)
+                if self._central101_meter.has_changed:
+                    has_changed = True
+            
+            if has_changed:
+                self._update_id += 1
+        except BaseException as e:
+            _LOGGER.error("Error fetching meter data from API: %s", e, exc_info=e)
             raise UpdateFailed(f"Invalid response from API: {e}") from e
         return self._update_id

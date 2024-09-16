@@ -17,6 +17,7 @@ class GaroMeter:
         self._l1_power = 0.0
         self._l2_power = 0.0
         self._l3_power = 0.0
+        self._apparent_power = 0.0
         self._accumulated_energy = 0.0
 
         self._has_changed = False
@@ -36,6 +37,7 @@ class GaroMeter:
         self.l1_power = utils.read_value(json, 'phase1InstPower', self._l1_power)
         self.l2_power = utils.read_value(json, 'phase2InstPower', self._l2_power)
         self.l3_power = utils.read_value(json, 'phase3InstPower', self._l3_power)
+        self.apparent_power = utils.read_value(json, 'apparentPower', self._apparent_power)
         self.accumulated_energy = utils.read_value(json, 'accEnergy', self._accumulated_energy)
         
         return self._has_changed
@@ -122,6 +124,16 @@ class GaroMeter:
         if self._l3_power == value:
             return
         self._l3_power = value
+        self._has_changed = True
+
+    @property
+    def apparent_power(self):
+        return self._apparent_power / self._power_divider
+    @apparent_power.setter
+    def apparent_power(self, value):
+        if self._apparent_power == value:
+            return
+        self._apparent_power = value
         self._has_changed = True
 
     @property

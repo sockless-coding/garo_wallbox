@@ -17,10 +17,10 @@ from homeassistant.components.sensor import (
 from homeassistant.helpers import config_validation as cv, entity_platform
 
 
-from .garo import GaroStatus, const, GaroCharger
+from .garo import GaroStatus, const, GaroCharger, GaroMeter
 from .const import (SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT, DOMAIN, COORDINATOR)
-from .coordinator import GaroDeviceCoordinator
-from .base import GaroEntity
+from .coordinator import GaroDeviceCoordinator, GaroMeterCoordinator
+from .base import GaroEntity, GaroMeterEntity
 from . import GaroConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,6 +34,11 @@ class GaroSensorEntityDescription(SensorEntityDescription):
 class GaroChargerSensorEntityDescription(SensorEntityDescription):
     """Describes Garo sensor entity."""
     get_state: Callable[[GaroCharger], Any]
+
+@dataclass(frozen=True, kw_only=True)
+class GaroMeterSensorEntityDescription(SensorEntityDescription):
+    """Describes Garo sensor entity."""
+    get_state: Callable[[GaroMeter], Any]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_add_entities):
@@ -411,7 +416,94 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
         for slave in coordinator.slaves:
             add_charger_entities(slave)
 
-   
+    if entry.runtime_data.meter_coordinator:
+        meter_coordinator = entry.runtime_data.meter_coordinator
+        def add_meter_sentities(meter: GaroMeter, is_3_phase: bool = True):
+            entities.extend(GaroMeterSensorEntity(meter_coordinator, entry, description, meter) for description in [    
+                GaroMeterSensorEntityDescription(
+                    key="meter_l1_current",
+                    translation_key="meter_l1_current",
+                    name="Current phase L1",
+                    device_class=SensorDeviceClass.CURRENT,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                    get_state=lambda meter: meter.l1_current,
+                ),
+                GaroMeterSensorEntityDescription(
+                    key="meter_l2_current",
+                    translation_key="meter_l2_current",
+                    name="Current phase L2",
+                    device_class=SensorDeviceClass.CURRENT,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                    get_state=lambda meter: meter.l2_current,
+                    entity_registry_enabled_default=is_3_phase
+                ),
+                GaroMeterSensorEntityDescription(
+                    key="meter_l3_current",
+                    translation_key="meter_l3_current",
+                    name="Current phase L3",
+                    device_class=SensorDeviceClass.CURRENT,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                    get_state=lambda meter: meter.l3_current,
+                    entity_registry_enabled_default=is_3_phase,
+                ),
+                GaroMeterSensorEntityDescription(
+                    key="meter_l1_power",
+                    translation_key="meter_l1_power",
+                    name="Power consumption phase L1",
+                    device_class=SensorDeviceClass.POWER,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    native_unit_of_measurement=UnitOfPower.KILO_WATT,
+                    get_state=lambda meter: meter.l1_power,
+                ),
+                GaroMeterSensorEntityDescription(
+                    key="meter_l2_power",
+                    translation_key="meter_l2_power",
+                    name="Power consumption phase L2",
+                    device_class=SensorDeviceClass.POWER,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    native_unit_of_measurement=UnitOfPower.KILO_WATT,
+                    get_state=lambda meter: meter.l2_power,
+                    entity_registry_enabled_default=is_3_phase,
+                ),
+                GaroMeterSensorEntityDescription(
+                    key="meter_l3_power",
+                    translation_key="meter_l3_power",
+                    name="Power consumption phase L3",
+                    device_class=SensorDeviceClass.POWER,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    native_unit_of_measurement=UnitOfPower.KILO_WATT,
+                    get_state=lambda meter: meter.l3_power,
+                    entity_registry_enabled_default=is_3_phase,
+                ),
+                GaroMeterSensorEntityDescription(
+                    key="meter_power_consumption",
+                    translation_key="meter_power_consumption",
+                    name="Power consumption",
+                    device_class=SensorDeviceClass.POWER,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    native_unit_of_measurement=UnitOfPower.KILO_WATT,
+                    get_state=lambda meter: meter.apparent_power,
+                ),
+                GaroMeterSensorEntityDescription(
+                    key="meter_accumulated_energy",
+                    translation_key="meter_accumulated_energy",
+                    name="Energy consumption (total)",
+                    device_class=SensorDeviceClass.ENERGY,
+                    state_class=SensorStateClass.TOTAL_INCREASING,
+                    native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+                    get_state=lambda meter: meter.accumulated_energy,
+                )])
+        
+        if meter_coordinator.has_external_meter:
+            add_meter_sentities(meter_coordinator.external_meter, meter_coordinator.external_meter.type not in [103,104])
+        if meter_coordinator.has_central100_meter:
+            add_meter_sentities(meter_coordinator.central100_meter, meter_coordinator.central100_meter.type not in [103,104])
+        if meter_coordinator.has_central101_meter:
+            add_meter_sentities(meter_coordinator.central101_meter)
+
     async_add_entities(entities)
 
     platform = entity_platform.current_platform.get()
@@ -459,6 +551,20 @@ class GaroChargerSensorEntity(GaroEntity, SensorEntity):
     def _async_update_attrs(self) -> None:
         """Update the attributes of the sensor."""
         self._attr_native_value = self.entity_description.get_state(self._charger)
+
+class GaroMeterSensorEntity(GaroMeterEntity, SensorEntity):
+    
+    entity_description: GaroMeterSensorEntityDescription
+
+    def __init__(self, coordinator: GaroMeterCoordinator, entry, description: GaroMeterSensorEntityDescription, meter: GaroMeter):
+        self.entity_description = description
+        self._meter = meter
+        super().__init__(coordinator, entry, description.key, meter)
+
+  
+    def _async_update_attrs(self) -> None:
+        """Update the attributes of the sensor."""
+        self._attr_native_value = self.entity_description.get_state(self._meter)
 
 
 class GaroLegacySensorEntity(GaroSensorEntity):
