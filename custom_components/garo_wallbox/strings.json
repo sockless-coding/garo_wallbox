@@ -78,6 +78,7 @@
         "name": "Number of Phases",
         "state": {
           "1": "Single phase",
+          "2": "Two phase",
           "3": "Three phase"
         }
       },
@@ -138,6 +139,7 @@
         "name": "Left Number of Phases",
         "state": {
           "1": "Single phase",
+          "2": "Two phase",
           "3": "Three phase"
         }
       },
@@ -189,6 +191,7 @@
         "name": "Right Number of Phases",
         "state": {
           "1": "Single phase",
+          "2": "Two phase",
           "3": "Three phase"
         }
       },

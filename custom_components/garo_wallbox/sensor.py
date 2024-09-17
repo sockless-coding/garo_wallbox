@@ -23,6 +23,8 @@ from .coordinator import GaroDeviceCoordinator, GaroMeterCoordinator
 from .base import GaroEntity, GaroMeterEntity
 from . import GaroConfigEntry
 
+AVAILABLE_PHASE_COUNTS = ["1","2","3"]
+
 _LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=True, kw_only=True)
@@ -79,7 +81,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 key="nr_of_phases",
                 translation_key="nr_of_phases",
                 name="Number of Phases",
-                options=["1", "3"],
+                options=AVAILABLE_PHASE_COUNTS,
                 device_class=SensorDeviceClass.ENUM,
                 state_class=None,
                 get_state=lambda status: str(status.number_of_phases),
@@ -190,7 +192,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 key="left_nr_of_phases",
                 translation_key="left_nr_of_phases",
                 name="Left Number of Phases",
-                options=["1", "3"],
+                options=AVAILABLE_PHASE_COUNTS,
                 device_class=SensorDeviceClass.ENUM,
                 state_class=None,
                 get_state=lambda status: str(status.main_charger.number_of_phases),
@@ -268,7 +270,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 key="right_nr_of_phases",
                 translation_key="right_nr_of_phases",
                 name="Right Number of Phases",
-                options=["1", "3"],
+                options=AVAILABLE_PHASE_COUNTS,
                 device_class=SensorDeviceClass.ENUM,
                 state_class=None,
                 get_state=lambda status: str(status.twin_charger.number_of_phases),
@@ -365,7 +367,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 key="nr_of_phases",
                 translation_key="nr_of_phases",
                 name="Number of Phases",
-                options=["1", "3"],
+                options=AVAILABLE_PHASE_COUNTS,
                 device_class=SensorDeviceClass.ENUM,
                 state_class=None,
                 get_state=lambda charger: str(charger.number_of_phases),
