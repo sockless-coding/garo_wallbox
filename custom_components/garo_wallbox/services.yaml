@@ -3,7 +3,7 @@ set_mode:
   fields:
     entity_id:
       description: Name(s) of entities to change.
-      example: "garo_wallbox.garage"
+      example: "sensor.garage"
     mode:
       description: New mode.
 
@@ -12,6 +12,57 @@ set_current_limit:
   fields:
     entity_id:
       description: Name(s) of entities to change.
-      example: "garo_wallbox.garage"
+      example: "sensor.garage"
     limit:
       description: New limit.
+
+add_schedule:
+  description: Add a new schedule for the EVSE.
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: "sensor.garage_schedule"
+    start:
+      description: Start time in (e.g., '08:00').
+      example: "08:00"
+    stop:
+      description: Stop time in (e.g., '17:00').
+      example: "17:00"
+    day_of_the_week:
+      description: Day of the week ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']).
+      example: "Monday"
+    charge_limit:
+      description: Charge limit for this schedule in Amperes (A).
+      example: 16
+
+set_schedule:
+  description: Update schedule for the EVSE.
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: "sensor.garage_schedule"
+    id:
+      description: ID of the schedule to update.
+      example: 1
+    start:
+      description: Start time in (e.g., '08:00').
+      example: "08:00"
+    stop:
+      description: Stop time in (e.g., '17:00').
+      example: "17:00"
+    day_of_the_week:
+      description: Day of the week ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']).
+      example: "Monday"
+    charge_limit:
+      description: Charge limit for this schedule in Amperes (A).
+      example: 16
+
+remove_schedule:
+  description: Remove a specific schedule from the EVSE.
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: "sensor.garage_schedule"
+    id:
+      description: ID of the schedule to remove.
+      example: 1

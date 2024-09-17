@@ -1,13 +1,13 @@
 import logging
 
-from datetime import timedelta
+from datetime import timedelta, datetime, time
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_NAME
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.entity import DeviceInfo
 
-from .garo import ApiClient, GaroConfig, GaroStatus, GaroCharger, GaroMeter
+from .garo import ApiClient, GaroConfig, GaroStatus, GaroCharger, GaroMeter, GaroSchema
 from .garo.const import CableLockMode, PRODUCT_MAP, GaroProductInfo
 from . import const
 
@@ -30,6 +30,7 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         self._status: GaroStatus | None = None
         self._name = self._config.master_charger.reference or entry.data[CONF_NAME]
         self._slaves = self._config.slaves
+        self._schema: list[GaroSchema] = []
 
         self._update_id = 0
 
@@ -59,6 +60,9 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
     def slaves(self) -> list[GaroCharger]:        
         return [slave for slave in self._slaves if slave.serial_number != self._config.serial_number and slave.serial_number != self._config.twin_serial]
 
+    @property
+    def schema(self) -> list[GaroSchema]:
+        return self._schema
 
     @property
     def device_info(self)->DeviceInfo:
@@ -99,6 +103,28 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
             mode = CableLockMode[mode]
         await self._api_client.async_set_cable_lock_mode(serial_number, mode)
 
+    async def async_fetch_schema(self):
+        self._schema = await self._api_client.async_get_schema()
+
+    async def async_set_schema(self, id:int, start:str|time, stop:str|time, day_of_the_week: int, charge_limit: int):
+        if isinstance(start, str):
+            start = datetime.strptime(start, "%H:%M:%S" if start.count(':') == 2 else "%H:%M").time()
+        if isinstance(stop, str):
+            stop = datetime.strptime(stop, "%H:%M:%S" if stop.count(':') == 2 else "%H:%M").time()
+        await self._api_client.async_set_schema(
+            id, 
+            start, 
+            stop,  
+            day_of_the_week, 
+            charge_limit)
+        await self._fetch_device_data()
+
+    async def async_remove_schema(self, id:int):
+        await self._api_client.async_remove_schema(id)
+        await self._fetch_device_data()
+        
+
+
     async def _fetch_device_data(self)->int:
         try:
             self._status = await self._api_client.async_get_status(self._status)
@@ -132,7 +158,7 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
         self._external_meter: GaroMeter | None = None
         self._central100_meter: GaroMeter | None = None
         self._central101_meter: GaroMeter | None = None
-
+        
         self._update_id = 0
 
     @property

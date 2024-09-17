@@ -1,11 +1,13 @@
 import aiohttp
 import logging
 import time
+import datetime
 
 from .garostatus import GaroStatus
 from .garoconfig import GaroConfig
 from .garocharger import GaroCharger
 from .garometer import GaroMeter
+from .garoschema import GaroSchema
 from . import const
 
 _LOGGER = logging.getLogger(__name__)
@@ -77,6 +79,25 @@ class ApiClient:
             meter.load(data)
         return meter
 		
+    async def async_get_schema(self):
+        response = await self._async_get('schema')
+        data = await response.json()
+        return [GaroSchema(s) for s in data]
+    
+    async def async_set_schema(self, id:int, start:datetime.time, stop:datetime.time, day_of_the_week: int, charge_limit: int):
+        payload = {
+            "schemaId": id,
+            "start": start.strftime("%H:%M:%S"),
+            "stop": stop.strftime("%H:%M:%S"),
+            "weekday": day_of_the_week,
+            "chargeLimit": charge_limit
+        }
+        response = await self._async_post(self._get_url('schema'), data=payload)
+        await response.text()
+
+    async def async_remove_schema(self, id:int):
+        response = await self._async_delete(self._get_url(f'schema/{id}'))
+        await response.text()
         
     
     async def async_set_mode(self, mode: const.Mode | str):
@@ -142,6 +163,13 @@ class ApiClient:
             method='POST', 
             url=url, 
             json=data,
+            headers={'content-type': 'application/json; charset=utf-8'})
+        return response
+    
+    async def _async_delete(self, url: str):
+        response = await self._client.request(
+            method='DELETE', 
+            url=url, 
             headers={'content-type': 'application/json; charset=utf-8'})
         return response
 

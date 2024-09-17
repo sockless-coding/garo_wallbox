@@ -1,5 +1,6 @@
 from typing import Callable, Any
 from dataclasses import dataclass
+from datetime import time
 import logging
 
 import voluptuous as vol
@@ -18,7 +19,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform
 
 
 from .garo import GaroStatus, const, GaroCharger, GaroMeter
-from .const import (SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT, DOMAIN, COORDINATOR)
+from .const import (SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT, SERVICE_SET_SCHEDULE, SERVICE_REMOVE_SCHEDULE, SERVICE_ADD_SCHEDULE)
 from .coordinator import GaroDeviceCoordinator, GaroMeterCoordinator
 from .base import GaroEntity, GaroMeterEntity
 from . import GaroConfigEntry
@@ -413,6 +414,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 get_state=lambda charger: charger.accumulated_energy / 1000 if charger.accumulated_energy else None,
             )
         ])
+    entities.append(GaroScheduleSensorEntity(coordinator, entry))
 
     if coordinator.config.has_slaves:
         for slave in coordinator.slaves:
@@ -524,6 +526,35 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
             },
             "async_set_current_limit",
         )
+        platform.async_register_entity_service(
+            SERVICE_ADD_SCHEDULE,
+            {
+                vol.Required('start'): cv.time,
+                vol.Required('stop'): cv.time,
+                vol.Required('day_of_the_week'): cv.enum(const.SchemaDayOfWeek),
+                vol.Optional('charge_limit'): cv.positive_int,
+            },
+            "async_add_schedule",
+        )
+        platform.async_register_entity_service(
+            SERVICE_SET_SCHEDULE,
+            {
+                vol.Required('id'): cv.positive_int,
+                vol.Required('start'): cv.time,
+                vol.Required('stop'): cv.time,
+                vol.Required('day_of_the_week'): cv.enum(const.SchemaDayOfWeek),
+                vol.Optional('charge_limit'): cv.positive_int,
+            },
+            "async_set_schedule",
+        )
+        platform.async_register_entity_service(
+            SERVICE_REMOVE_SCHEDULE,
+            {
+                vol.Required('id'): cv.positive_int,
+            },
+            "async_remove_schedule",
+        )
+        
 
 
 
@@ -576,3 +607,58 @@ class GaroLegacySensorEntity(GaroSensorEntity):
 
     async def async_set_current_limit(self, limit):
         await self.coordinator.api_client.async_set_current_limit(limit)
+
+class GaroScheduleSensorEntity(GaroEntity, SensorEntity):
+    
+
+    def __init__(self, coordinator: GaroDeviceCoordinator, entry):
+        self.entity_description = SensorEntityDescription(
+            key="schedule",
+            translation_key="schedule",
+            icon="mdi:calendar-clock",
+            name="Schedule",
+            state_class=None
+        )
+        super().__init__(coordinator, entry, self.entity_description.key)
+  
+    def _async_update_attrs(self) -> None:
+        """Update the attributes of the sensor."""
+        self._entries = self.coordinator.schema
+        self._attr_native_value = len(self._entries)
+        
+    @property
+    def entries(self):
+        return [{
+            'id': entry.id,
+            'start': entry.start,
+            'stop': entry.stop,
+            'day_of_the_week': entry.day_of_the_week.name,
+            'charge_limit': entry.charge_limit
+        } for entry in self._entries]
+
+    @property
+    def state_attributes(self):
+        """Return the data of the entity."""
+        output = {
+            "entries": self.entries,
+        }
+        return output
+    
+    async def async_add_schedule(self, start:str|time, stop:str|time, day_of_the_week: const.SchemaDayOfWeek | int, charge_limit: int = 0):
+        if isinstance(day_of_the_week, const.SchemaDayOfWeek):
+            day_of_the_week = day_of_the_week.value
+        await self.coordinator.async_set_schema(0, start, stop, day_of_the_week, charge_limit)
+        self._async_update_attrs()
+        self.async_write_ha_state()
+    
+    async def async_set_schedule(self, id:int, start: str|time, stop:str|time, day_of_the_week: const.SchemaDayOfWeek | int, charge_limit: int = 0):
+        if isinstance(day_of_the_week, const.SchemaDayOfWeek):
+            day_of_the_week = day_of_the_week.value
+        await self.coordinator.async_set_schema(id, start, stop, day_of_the_week, charge_limit)
+        self._async_update_attrs()
+        self.async_write_ha_state()
+
+    async def async_remove_schedule(self, id:int):
+        await self.coordinator.async_remove_schema(id)
+        self._async_update_attrs()
+        self.async_write_ha_state()
