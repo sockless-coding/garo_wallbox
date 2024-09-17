@@ -27,6 +27,7 @@
             "nr_of_phases":{
                 "state":{
                     "1":"mdi:record-circle-outline",
+                    "2":"mdi:numeric-2-circle-outline",
                     "3":"mdi:google-circles-communities"
                 }
             },
@@ -56,6 +57,7 @@
             "left_nr_of_phases":{
                 "state":{
                     "1":"mdi:record-circle-outline",
+                    "2":"mdi:numeric-2-circle-outline",
                     "3":"mdi:google-circles-communities"
                 }
             },
@@ -85,6 +87,7 @@
             "right_nr_of_phases":{
                 "state":{
                     "1":"mdi:record-circle-outline",
+                    "2":"mdi:numeric-2-circle-outline",
                     "3":"mdi:google-circles-communities"
                 }
             }
