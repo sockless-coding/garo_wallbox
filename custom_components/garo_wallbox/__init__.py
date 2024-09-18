@@ -61,6 +61,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry):
             configuration = await api_client.async_get_configuration()
         coordinator = GaroDeviceCoordinator(hass, entry, api_client, configuration)
         await coordinator.async_config_entry_first_refresh()
+        try:
+            with timeout(5):
+                await coordinator.async_fetch_schema()
+        except Exception:
+            _LOGGER.exception("Failed to fetch schema")
+            pass
         meter_coordinator: GaroMeterCoordinator | None = None
         if configuration.has_load_balancer:
             meter_coordinator = GaroMeterCoordinator(hass, entry, api_client, configuration)

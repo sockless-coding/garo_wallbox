@@ -43,6 +43,15 @@ class CableLockMode(Enum):
     LOCKED = 2
     LOCKED_WITH_POWER_LOSS_UNLOCK = 1
 
+class SchemaDayOfWeek(Enum):
+    MONDAY = 1
+    TUESDAY = 2
+    WEDNESDAY = 3
+    THURSDAY = 4
+    FRIDAY = 5
+    SATURDAY = 6
+    SUNDAY = 7
+
 class GaroProductInfo:
     def __init__(self, name: str, has_meter: bool = False, is_3_phase: bool = False, has_outlet: bool = False):
         self.name = name
