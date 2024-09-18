@@ -104,7 +104,12 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         await self._api_client.async_set_cable_lock_mode(serial_number, mode)
 
     async def async_fetch_schema(self):
-        self._schema = await self._api_client.async_get_schema()
+        try:
+            self._schema = await self._api_client.async_get_schema()
+            _LOGGER.debug("Fetched {} schemas".format(len(self._schema)))
+        except Exception as e:
+            _LOGGER.error("Failed to fetch schema: {}".format(e), exc_info=e)
+        
 
     async def async_set_schema(self, id:int, start:str|time, stop:str|time, day_of_the_week: int, charge_limit: int):
         if isinstance(start, str):
@@ -117,11 +122,11 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
             stop,  
             day_of_the_week, 
             charge_limit)
-        await self._fetch_device_data()
+        await self.async_fetch_schema()
 
     async def async_remove_schema(self, id:int):
         await self._api_client.async_remove_schema(id)
-        await self._fetch_device_data()
+        await self.async_fetch_schema()
         
 
 

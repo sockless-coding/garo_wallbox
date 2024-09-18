@@ -30,7 +30,7 @@ add_schedule:
       example: "17:00"
     day_of_the_week:
       description: Day of the week ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']).
-      example: "Monday"
+      example: "MONDAY"
     charge_limit:
       description: Charge limit for this schedule in Amperes (A).
       example: 16
@@ -52,7 +52,7 @@ set_schedule:
       example: "17:00"
     day_of_the_week:
       description: Day of the week ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']).
-      example: "Monday"
+      example: "MONDAY"
     charge_limit:
       description: Charge limit for this schedule in Amperes (A).
       example: 16

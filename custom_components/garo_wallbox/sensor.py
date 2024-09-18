@@ -625,6 +625,7 @@ class GaroScheduleSensorEntity(GaroEntity, SensorEntity):
         """Update the attributes of the sensor."""
         self._entries = self.coordinator.schema
         self._attr_native_value = len(self._entries)
+        _LOGGER.debug(f"Updated schedule entries: {len(self._entries)}")
         
     @property
     def entries(self):
