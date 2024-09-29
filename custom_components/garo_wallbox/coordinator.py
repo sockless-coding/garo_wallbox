@@ -2,7 +2,7 @@ import logging
 
 from datetime import timedelta, datetime, time
 from homeassistant.core import HomeAssistant
-from homeassistant.const import CONF_NAME
+from homeassistant.const import (CONF_NAME, CONF_TYPE)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.entity import DeviceInfo
@@ -142,6 +142,10 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
                         break
             if has_changed:
                 self._update_id += 1
+
+                # Trigger event to update entities
+                self.hass.bus.async_fire(const.EVENT_NAME, {CONF_TYPE: const.EVENT_TYPE_DATA_UPDATED})
+
         except BaseException as e:
             _LOGGER.error("Error fetching device data from API: %s", e, exc_info=e)
             raise UpdateFailed(f"Invalid response from API: {e}") from e

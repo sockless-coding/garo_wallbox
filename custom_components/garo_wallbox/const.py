@@ -21,3 +21,6 @@ COORDINATOR = "coordinator"
 COMPONENT_TYPES = ["sensor","select","number","switch"]
 
 ATTR_MODES = "modes"
+
+EVENT_NAME = "garo_wallbox_event"
+EVENT_TYPE_DATA_UPDATED = "data_updated"
