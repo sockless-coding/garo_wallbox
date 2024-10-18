@@ -6,12 +6,16 @@ from homeassistant.const import CONF_NAME
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.storage import Store
 
 from .garo import ApiClient, GaroConfig, GaroStatus, GaroCharger, GaroMeter, GaroSchema
 from .garo.const import CableLockMode, PRODUCT_MAP, GaroProductInfo
 from . import const
 
 _LOGGER = logging.getLogger(__name__)
+
+METER_CALCULATE_POWER = 'meter_calculate_power'
+METER_VOLTAGE = 'meter_voltage'
 
 class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry, api_client: ApiClient, config: GaroConfig) -> None:
@@ -31,6 +35,7 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         self._name = self._config.master_charger.reference or entry.data[CONF_NAME]
         self._slaves = self._config.slaves
         self._schema: list[GaroSchema] = []
+
 
         self._update_id = 0
 
@@ -75,6 +80,8 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
             sw_version=self._config.package_version,
             hw_version=f"{self._config.firmware_version}.{self._config.firmware_revision}"
         )
+    
+
     
     def get_charger_device_info(self, charger: GaroCharger)->DeviceInfo:
         product = self.get_product_info(charger)
@@ -163,6 +170,8 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
         self._external_meter: GaroMeter | None = None
         self._central100_meter: GaroMeter | None = None
         self._central101_meter: GaroMeter | None = None
+        self._store = Store(hass, version=1, key="garo_meter")
+        self._stored_data: dict|None = None
         
         self._update_id = 0
 
@@ -193,6 +202,18 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
             raise ValueError("Central 101 meter not initialized")
         return self._central101_meter
     
+    @property
+    def calculate_power(self)->bool:
+        if self._stored_data is None:
+            raise ValueError("Stored data is not initialized")        
+        return self._stored_data[METER_CALCULATE_POWER] if METER_CALCULATE_POWER in self._stored_data else True
+    
+    @property
+    def voltage(self)->int:
+        if self._stored_data is None:
+            raise ValueError("Stored data is not initialized")
+        return int(self._stored_data[METER_VOLTAGE]) if METER_VOLTAGE in self._stored_data else 230
+    
     def get_device_info(self, meter: GaroMeter)->DeviceInfo:
         
         return DeviceInfo(            
@@ -202,10 +223,32 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
             model=f"Type {meter.type}",
             serial_number=str(meter.serial_number),
         )
+    
+    async def async_set_calculate_power(self, calculate_power:bool):
+        """Set calculate power."""
+        if self._stored_data is None:
+            raise ValueError("Stored data is not initialized")
+        _LOGGER.debug(f"Setting calculate power to {calculate_power}")
+        self._stored_data[METER_CALCULATE_POWER] = calculate_power
+        await self._store.async_save(self._stored_data)
+        self.async_update_listeners()
+
+    async def async_set_voltage(self, voltage:int):
+        """Set voltage."""
+        if self._stored_data is None:
+            raise ValueError("Stored data is not initialized")
+        _LOGGER.debug(f"Setting voltage to {voltage}")
+        self._stored_data[METER_VOLTAGE] = voltage
+        await self._store.async_save(self._stored_data)
+        self.async_update_listeners()
+
 
     async def _fetch_device_data(self)->int:
         try:
             has_changed = False
+            if not self._stored_data:
+                self._stored_data = await self._store.async_load() or {}
+                _LOGGER.debug("Loaded stored data: %s", self._stored_data)
             if self._config.local_load_balanced:
                 self._external_meter = await self._api_client.async_get_external_meter(self._external_meter)
                 if self._external_meter.has_changed:
