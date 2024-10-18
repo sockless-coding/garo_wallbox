@@ -9,7 +9,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.storage import Store
 
 from .garo import ApiClient, GaroConfig, GaroStatus, GaroCharger, GaroMeter, GaroSchema
-from .garo.const import CableLockMode, PRODUCT_MAP, GaroProductInfo
+from .garo.const import CableLockMode, PRODUCT_MAP, GaroProductInfo, Mode as GaroMode
 from . import const
 
 _LOGGER = logging.getLogger(__name__)
@@ -104,15 +104,18 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
     async def async_enable_charge_limit(self, enable: bool):
         await self._api_client.async_enable_charge_limit(enable)
         self._config = await self._api_client.async_get_configuration()
+        self.async_update_listeners()
 
     async def async_set_cable_lock_mode(self, serial_number: int, mode: CableLockMode| str):
         if isinstance(mode, str):
             mode = CableLockMode[mode]
         await self._api_client.async_set_cable_lock_mode(serial_number, mode)
+        await self.async_request_refresh()
 
     async def async_fetch_schema(self):
         try:
             self._schema = await self._api_client.async_get_schema()
+            self.async_update_listeners()
             _LOGGER.debug("Fetched {} schemas".format(len(self._schema)))
         except Exception as e:
             _LOGGER.error("Failed to fetch schema: {}".format(e), exc_info=e)
@@ -135,6 +138,13 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         await self._api_client.async_remove_schema(id)
         await self.async_fetch_schema()
         
+    async def async_set_mode(self, mode: GaroMode | str):
+        await self._api_client.async_set_mode(mode)
+        await self.async_request_refresh()
+
+    async def async_set_current_limit(self, limit: int):
+        await self._api_client.async_set_current_limit(limit)
+        await self.async_request_refresh()
 
 
     async def _fetch_device_data(self)->int:

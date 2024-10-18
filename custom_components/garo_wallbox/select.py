@@ -37,7 +37,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
             name=coordinator.main_charger_name,
             icon="mdi:ev-station",
             options=[opt.value for opt in const.Mode],
-            set_option=lambda option: api_client.async_set_mode(option),
+            set_option=lambda option: coordinator.async_set_mode(option),
             get_current_option=lambda status: status.mode.value
         ),
     ]
