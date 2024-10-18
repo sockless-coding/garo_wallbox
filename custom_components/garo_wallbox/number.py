@@ -35,7 +35,6 @@ class GaroMeterNumberEntityDescription(NumberEntityDescription):
 async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_add_entities):
     """Set up using config_entry."""
     coordinator = entry.runtime_data.coordinator
-    api_client = coordinator.api_client
     configuration = coordinator.config
     entities:list[NumberEntity] =[
         GaroNumberEntity(coordinator, entry, description) for description in [
@@ -49,7 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 native_step=1,
                 native_unit_of_measurement="A",
                 get_value=lambda status: status.current_limit,
-                set_value=lambda value: api_client.async_set_current_limit(value),
+                set_value=lambda value: coordinator.async_set_current_limit(value),
                 is_available=lambda: coordinator.config.charge_limit_enabled,
             ),
         ]]
