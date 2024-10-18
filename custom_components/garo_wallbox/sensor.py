@@ -460,7 +460,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                     device_class=SensorDeviceClass.POWER,
                     state_class=SensorStateClass.MEASUREMENT,
                     native_unit_of_measurement=UnitOfPower.KILO_WATT,
-                    get_state=lambda meter: meter.l1_power,
+                    get_state=lambda meter: round(meter.l1_current*meter_coordinator.voltage, -1)/1000 if meter_coordinator.calculate_power else meter.l1_power,
                 ),
                 GaroMeterSensorEntityDescription(
                     key="meter_l2_power",
@@ -469,7 +469,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                     device_class=SensorDeviceClass.POWER,
                     state_class=SensorStateClass.MEASUREMENT,
                     native_unit_of_measurement=UnitOfPower.KILO_WATT,
-                    get_state=lambda meter: meter.l2_power,
+                    get_state=lambda meter: round(meter.l2_current*meter_coordinator.voltage, -1)/1000 if meter_coordinator.calculate_power else meter.l2_power,
                     entity_registry_enabled_default=is_3_phase,
                 ),
                 GaroMeterSensorEntityDescription(
@@ -479,7 +479,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                     device_class=SensorDeviceClass.POWER,
                     state_class=SensorStateClass.MEASUREMENT,
                     native_unit_of_measurement=UnitOfPower.KILO_WATT,
-                    get_state=lambda meter: meter.l3_power,
+                    get_state=lambda meter: round(meter.l3_current*meter_coordinator.voltage, -1)/1000 if meter_coordinator.calculate_power else meter.l3_power,
                     entity_registry_enabled_default=is_3_phase,
                 ),
                 GaroMeterSensorEntityDescription(
@@ -489,7 +489,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                     device_class=SensorDeviceClass.POWER,
                     state_class=SensorStateClass.MEASUREMENT,
                     native_unit_of_measurement=UnitOfPower.KILO_WATT,
-                    get_state=lambda meter: meter.apparent_power,
+                    get_state=lambda meter: round((meter.l1_current+meter.l2_current+meter.l3_current)*meter_coordinator.voltage, -1)/1000 if meter_coordinator.calculate_power else meter.apparent_power,
                 ),
                 GaroMeterSensorEntityDescription(
                     key="meter_accumulated_energy",
