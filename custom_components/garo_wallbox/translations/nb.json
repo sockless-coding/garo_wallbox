@@ -1,17 +1,252 @@
 {
-    "config": {
-      "step": {
-        "user": {
-          "title": "Konfigurer Garo Wallbox",
-          "description": "Skriv inn IP-adressen til Garo Wallbox.",
-          "data": { "host": "Vert", "name": "Vennlig navn" }
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfigurer Garo Wallbox",
+        "description": "Oppgi IP-adressen til din Garo Wallbox.",
+        "data": {
+          "host": "Vert",
+          "name": "Vennlig navn",
+          "device_fetch_interval": "Henteintervall (sekunder)",
+          "meter_fetch_interval": "Målerhenteintervall (sekunder)"
+        }
+      }
+    },
+    "abort": {
+      "device_timeout": "Tidsavbrudd ved tilkobling til enheten.",
+      "device_fail": "Uventet feil ved opprettelse av enhet.",
+      "already_configured": "Enheten er allerede konfigurert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "host": "Vert",
+          "name": "Vennlig navn",
+          "device_fetch_interval": "Henteintervall (sekunder)",
+          "meter_fetch_interval": "Målerhenteintervall (sekunder)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "sensor": {
+        "state": {
+          "ALWAYS_ON": "Tilgjengelig for lading",
+          "ALWAYS_OFF": "Ikke tilgjengelig for lading",
+          "SCHEMA": "Tidsplan"
         }
       },
-      "abort": {
-        "device_timeout": "Tidsavbrudd for tilkobling til enheten.",
-        "device_fail": "Uventet feil under oppretting av enhet.",
-        "already_configured": "Enheten er allerede konfigurert"
+      "status": {
+        "name": "Status",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Kjøretøy ikke tilkoblet",
+          "CONNECTED": "Venter på startsignal fra bilen",
+          "SEARCH_COMM": "Kjøretøy ikke tilkoblet",
+          "RCD_FAULT": "RCD-feil",
+          "CHARGING": "Lader",
+          "CHARGING_PAUSED": "Ladeprosessen er midlertidig stanset av lastbalanseringssystemet",
+          "CHARGING_FINISHED": "Lading avsluttet av bilen",
+          "CHARGING_CANCELLED": "Lading avbrutt",
+          "DISABLED": "Lading deaktivert",
+          "OVERHEAT": "Overtemperatur, lading midlertidig begrenset til 6A",
+          "CRITICAL_TEMPERATURE": "Overtemperatur, lading avbrutt",
+          "INITIALIZATION": "Initialiserer...",
+          "CABLE_FAULT": "Kabelproblem",
+          "LOCK_FAULT": "Låsefeil",
+          "CONTACTOR_FAULT:": "Kontaktorfeil",
+          "VENT_FAULT": "Ventilasjon påkrevd",
+          "DC_ERROR": "DC-feil oppdaget",
+          "DC_HARDWARE": "DC-deteksjonsfeil, lading deaktivert",
+          "CP_FAULT": "CP-signalfeil, lading stoppet",
+          "CP_SHORTED": "CP-signal kortsluttet, lading stoppet",
+          "REMOTE_DISABLED": "Lading deaktivert eksternt",
+          "UNAVAILABLE": "Lading midlertidig stanset",
+          "UNKNOWN": "Kommunikasjonsfeil"
+        }
+      },
+      "current_charging_current": {
+        "name": "Ladestrøm"
+      },
+      "current_charging_power": {
+        "name": "Ladeeffekt"
+      },
+      "nr_of_phases": {
+        "name": "Antall faser",
+        "state": {
+          "1": "Enfaset",
+          "2": "Tofaset",
+          "3": "Trefaset"
+        }
+      },
+      "current_limit": {
+        "name": "Strømbegrensning"
+      },
+      "pilot_level": {
+        "name": "Pilotnivå"
+      },
+      "acc_session_energy": {
+        "name": "Energiforbruk per økt"
+      },
+      "latest_reading": {
+        "name": "Total energi"
+      },
+      "latest_reading_k": {
+        "name": "Total energi (kWh)"
+      },
+      "current_temperature": {
+        "name": "Temperatur"
+      },
+      "left_status": {
+        "name": "Venstre uttak",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Kjøretøy ikke tilkoblet",
+          "CONNECTED": "Venter på startsignal fra bilen",
+          "SEARCH_COMM": "Kjøretøy ikke tilkoblet",
+          "RCD_FAULT": "RCD-feil",
+          "CHARGING": "Lader",
+          "CHARGING_PAUSED": "Ladeprosessen er midlertidig stanset av lastbalanseringssystemet",
+          "CHARGING_FINISHED": "Lading avsluttet av bilen",
+          "CHARGING_CANCELLED": "Lading avbrutt",
+          "DISABLED": "Lading deaktivert",
+          "OVERHEAT": "Overtemperatur, lading midlertidig begrenset til 6A",
+          "CRITICAL_TEMPERATURE": "Overtemperatur, lading avbrutt",
+          "INITIALIZATION": "Initialiserer...",
+          "CABLE_FAULT": "Kabelproblem",
+          "LOCK_FAULT": "Låsefeil",
+          "CONTACTOR_FAULT:": "Kontaktorfeil",
+          "VENT_FAULT": "Ventilasjon påkrevd",
+          "DC_ERROR": "DC-feil oppdaget",
+          "DC_HARDWARE": "DC-deteksjonsfeil, lading deaktivert",
+          "CP_FAULT": "CP-signalfeil, lading stoppet",
+          "CP_SHORTED": "CP-signal kortsluttet, lading stoppet",
+          "REMOTE_DISABLED": "Lading deaktivert eksternt",
+          "UNAVAILABLE": "Lading midlertidig stanset",
+          "UNKNOWN": "Kommunikasjonsfeil"
+        }
+      },
+      "left_current_charging_current": {
+        "name": "Venstre ladestrøm"
+      },
+      "left_current_charging_power": {
+        "name": "Venstre ladeeffekt"
+      },
+      "left_nr_of_phases": {
+        "name": "Venstre antall faser",
+        "state": {
+          "1": "Enfaset",
+          "2": "Tofaset",
+          "3": "Trefaset"
+        }
+      },
+      "left_pilot_level": {
+        "name": "Venstre pilotnivå"
+      },
+      "left_acc_session_energy": {
+        "name": "Venstre energiforbruk per økt"
+      },
+      "left_acc_energy": {
+        "name": "Venstre total energi"
+      },
+      "right_status": {
+        "name": "Høyre uttak",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Kjøretøy ikke tilkoblet",
+          "CONNECTED": "Venter på startsignal fra bilen",
+          "SEARCH_COMM": "Kjøretøy ikke tilkoblet",
+          "RCD_FAULT": "RCD-feil",
+          "CHARGING": "Lader",
+          "CHARGING_PAUSED": "Ladeprosessen er midlertidig stanset av lastbalanseringssystemet",
+          "CHARGING_FINISHED": "Lading avsluttet av bilen",
+          "CHARGING_CANCELLED": "Lading avbrutt",
+          "DISABLED": "Lading deaktivert",
+          "OVERHEAT": "Overtemperatur, lading midlertidig begrenset til 6A",
+          "CRITICAL_TEMPERATURE": "Overtemperatur, lading avbrutt",
+          "INITIALIZATION": "Initialiserer...",
+          "CABLE_FAULT": "Kabelproblem",
+          "LOCK_FAULT": "Låsefeil",
+          "CONTACTOR_FAULT:": "Kontaktorfeil",
+          "VENT_FAULT": "Ventilasjon påkrevd",
+          "DC_ERROR": "DC-feil oppdaget",
+          "DC_HARDWARE": "DC-deteksjonsfeil, lading deaktivert",
+          "CP_FAULT": "CP-signalfeil, lading stoppet",
+          "CP_SHORTED": "CP-signal kortsluttet, lading stoppet",
+          "REMOTE_DISABLED": "Lading deaktivert eksternt",
+          "UNAVAILABLE": "Lading midlertidig stanset",
+          "UNKNOWN": "Kommunikasjonsfeil"
+        }
+      },
+      "right_current_charging_current": {
+        "name": "Høyre ladestrøm"
+      },
+      "right_current_charging_power": {
+        "name": "Høyre ladeeffekt"
+      },
+      "right_nr_of_phases": {
+        "name": "Høyre antall faser",
+        "state": {
+          "1": "Enfaset",
+          "2": "Tofaset",
+          "3": "Trefaset"
+        }
+      },
+      "right_pilot_level": {
+        "name": "Høyre pilotnivå"
+      },
+      "right_acc_session_energy": {
+        "name": "Høyre energiforbruk per økt"
+      },
+      "right_acc_energy": {
+        "name": "Høyre total energi"
+      }
+    },
+    "select": {
+      "sensor": {
+        "state": {
+          "ALWAYS_ON": "Tilgjengelig for lading",
+          "ALWAYS_OFF": "Ikke tilgjengelig for lading",
+          "SCHEMA": "Tidsplan"
+        }
+      },
+      "outlet": {
+        "name": "Uttak",
+        "state": {
+          "UNLOCKED": "Ulåst",
+          "LOCKED": "Låst",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Låst med opplåsing ved strømbrudd"
+        }
+      },
+      "left_outlet": {
+        "name": "Venstre uttak",
+        "state": {
+          "UNLOCKED": "Ulåst",
+          "LOCKED": "Låst",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Låst med opplåsing ved strømbrudd"
+        }
+      },
+      "right_outlet": {
+        "name": "Høyre uttak",
+        "state": {
+          "UNLOCKED": "Ulåst",
+          "LOCKED": "Låst",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Låst med opplåsing ved strømbrudd"
+        }
+      }
+    },
+    "number": {
+      "current_limit": {
+        "name": "Strømbegrensning"
+      }
+    },
+    "switch": {
+      "charge_limit": {
+        "name": "Ladegrense"
       }
     }
   }
-  
+}
