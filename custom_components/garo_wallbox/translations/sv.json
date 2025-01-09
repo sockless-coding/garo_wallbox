@@ -1,0 +1,252 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfigurera Garo Wallbox",
+        "description": "Ange IP-adressen till din Garo Wallbox.",
+        "data": {
+          "host": "Värdnamn eller IP-adress",
+          "name": "Eget namn",
+          "device_fetch_interval": "Hämtningsintervall (sekunder)",
+          "meter_fetch_interval": "Hämtningsintervall för mätare (sekunder)"
+        }
+      }
+    },
+    "abort": {
+      "device_timeout": "Timeout vid anslutning till enheten.",
+      "device_fail": "Oväntat fel vid skapande av enhet.",
+      "already_configured": "Enheten är redan konfigurerad"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "host": "Värdnamn eller IP-adress",
+          "name": "Eget namn",
+          "device_fetch_interval": "Hämtningsintervall (sekunder)",
+          "meter_fetch_interval": "Hämtningsintervall för mätare (sekunder)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "sensor": {
+        "state": {
+          "ALWAYS_ON": "Tillgänglig för laddning",
+          "ALWAYS_OFF": "Ej tillgänglig för laddning",
+          "SCHEMA": "Schema"
+        }
+      },
+      "status": {
+        "name": "Status",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Fordon ej anslutet",
+          "CONNECTED": "Väntar på startsignal från fordon",
+          "SEARCH_COMM": "Fordon ej anslutet",
+          "RCD_FAULT": "RCD-fel",
+          "CHARGING": "Laddar",
+          "CHARGING_PAUSED": "Laddningsprocess pausad av lastbalanseringssystem",
+          "CHARGING_FINISHED": "Laddning avslutad av fordon",
+          "CHARGING_CANCELLED": "Laddning avbruten",
+          "DISABLED": "Laddning inaktiverad",
+          "OVERHEAT": "Övertemperatur, laddning tillfälligt begränsad till 6A",
+          "CRITICAL_TEMPERATURE": "Övertemperatur, laddning avbruten",
+          "INITIALIZATION": "Initialisering...",
+          "CABLE_FAULT": "Kabelfel",
+          "LOCK_FAULT": "Låsfel",
+          "CONTACTOR_FAULT:": "Kontaktorfel",
+          "VENT_FAULT": "Ventilation krävs",
+          "DC_ERROR": "DC-fel upptäckt",
+          "DC_HARDWARE": "DC-upptäcktsfel, laddning inaktiverad",
+          "CP_FAULT": "CP-signalfel, laddning stoppad",
+          "CP_SHORTED": "CP-signal kortsluten, laddning stoppad",
+          "REMOTE_DISABLED": "Laddning externt inaktiverad",
+          "UNAVAILABLE": "Laddning pausad",
+          "UNKNOWN": "Kommunikationsfel"
+        }
+      },
+      "current_charging_current": {
+        "name": "Laddningsström"
+      },
+      "current_charging_power": {
+        "name": "Laddningseffekt"
+      },
+      "nr_of_phases": {
+        "name": "Antal faser",
+        "state": {
+          "1": "Enfas",
+          "2": "Tvåfas",
+          "3": "Trefas"
+        }
+      },
+      "current_limit": {
+        "name": "Strömbegränsning"
+      },
+      "pilot_level": {
+        "name": "Pilotnivå"
+      },
+      "acc_session_energy": {
+        "name": "Sessionsenergi"
+      },
+      "latest_reading": {
+        "name": "Total energi"
+      },
+      "latest_reading_k": {
+        "name": "Total energi (kWh)"
+      },
+      "current_temperature": {
+        "name": "Temperatur"
+      },
+      "left_status": {
+        "name": "Vänster uttag",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Fordon ej anslutet",
+          "CONNECTED": "Väntar på startsignal från fordon",
+          "SEARCH_COMM": "Fordon ej anslutet",
+          "RCD_FAULT": "RCD-fel",
+          "CHARGING": "Laddar",
+          "CHARGING_PAUSED": "Laddningsprocess pausad av lastbalanseringssystem",
+          "CHARGING_FINISHED": "Laddning avslutad av fordon",
+          "CHARGING_CANCELLED": "Laddning avbruten",
+          "DISABLED": "Laddning inaktiverad",
+          "OVERHEAT": "Övertemperatur, laddning tillfälligt begränsad till 6A",
+          "CRITICAL_TEMPERATURE": "Övertemperatur, laddning avbruten",
+          "INITIALIZATION": "Initialisering...",
+          "CABLE_FAULT": "Kabelfel",
+          "LOCK_FAULT": "Låsfel",
+          "CONTACTOR_FAULT:": "Kontaktorfel",
+          "VENT_FAULT": "Ventilation krävs",
+          "DC_ERROR": "DC-fel upptäckt",
+          "DC_HARDWARE": "DC-upptäcktsfel, laddning inaktiverad",
+          "CP_FAULT": "CP-signalfel, laddning stoppad",
+          "CP_SHORTED": "CP-signal kortsluten, laddning stoppad",
+          "REMOTE_DISABLED": "Laddning externt inaktiverad",
+          "UNAVAILABLE": "Laddning pausad",
+          "UNKNOWN": "Kommunikationsfel"
+        }
+      },
+      "left_current_charging_current": {
+        "name": "Vänster laddningsström"
+      },
+      "left_current_charging_power": {
+        "name": "Vänster laddningseffekt"
+      },
+      "left_nr_of_phases": {
+        "name": "Vänster antal faser",
+        "state": {
+          "1": "Enfas",
+          "2": "Tvåfas",
+          "3": "Trefas"
+        }
+      },
+      "left_pilot_level": {
+        "name": "Vänster pilotnivå"
+      },
+      "left_acc_session_energy": {
+        "name": "Vänster sessionsenergi"
+      },
+      "left_acc_energy": {
+        "name": "Vänster total energi"
+      },
+      "right_status": {
+        "name": "Höger uttag",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Fordon ej anslutet",
+          "CONNECTED": "Väntar på startsignal från fordon",
+          "SEARCH_COMM": "Fordon ej anslutet",
+          "RCD_FAULT": "RCD-fel",
+          "CHARGING": "Laddar",
+          "CHARGING_PAUSED": "Laddningsprocess pausad av lastbalanseringssystem",
+          "CHARGING_FINISHED": "Laddning avslutad av fordon",
+          "CHARGING_CANCELLED": "Laddning avbruten",
+          "DISABLED": "Laddning inaktiverad",
+          "OVERHEAT": "Övertemperatur, laddning tillfälligt begränsad till 6A",
+          "CRITICAL_TEMPERATURE": "Övertemperatur, laddning avbruten",
+          "INITIALIZATION": "Initialisering...",
+          "CABLE_FAULT": "Kabelfel",
+          "LOCK_FAULT": "Låsfel",
+          "CONTACTOR_FAULT:": "Kontaktorfel",
+          "VENT_FAULT": "Ventilation krävs",
+          "DC_ERROR": "DC-fel upptäckt",
+          "DC_HARDWARE": "DC-upptäcktsfel, laddning inaktiverad",
+          "CP_FAULT": "CP-signalfel, laddning stoppad",
+          "CP_SHORTED": "CP-signal kortsluten, laddning stoppad",
+          "REMOTE_DISABLED": "Laddning externt inaktiverad",
+          "UNAVAILABLE": "Laddning pausad",
+          "UNKNOWN": "Kommunikationsfel"
+        }
+      },
+      "right_current_charging_current": {
+        "name": "Höger laddningsström"
+      },
+      "right_current_charging_power": {
+        "name": "Höger laddningseffekt"
+      },
+      "right_nr_of_phases": {
+        "name": "Höger antal faser",
+        "state": {
+          "1": "Enfas",
+          "2": "Tvåfas",
+          "3": "Trefas"
+        }
+      },
+      "right_pilot_level": {
+        "name": "Höger pilotnivå"
+      },
+      "right_acc_session_energy": {
+        "name": "Höger sessionsenergi"
+      },
+      "right_acc_energy": {
+        "name": "Höger total energi"
+      }
+    },
+    "select": {
+      "sensor": {
+        "state": {
+          "ALWAYS_ON": "Tillgänglig för laddning",
+          "ALWAYS_OFF": "Ej tillgänglig för laddning",
+          "SCHEMA": "Schema"
+        }
+      },
+      "outlet": {
+        "name": "Uttag",
+        "state": {
+          "UNLOCKED": "Olåst",
+          "LOCKED": "Låst",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Låst med strömförlust upplåsning"
+        }
+      },
+      "left_outlet": {
+        "name": "Vänster uttag",
+        "state": {
+          "UNLOCKED": "Olåst",
+          "LOCKED": "Låst",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Låst med strömförlust upplåsning"
+        }
+      },
+      "right_outlet": {
+        "name": "Höger uttag",
+        "state": {
+          "UNLOCKED": "Olåst",
+          "LOCKED": "Låst",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Låst med strömförlust upplåsning"
+        }
+      }
+    },
+    "number": {
+      "current_limit": {
+        "name": "Strömbegränsning"
+      }
+    },
+    "switch": {
+      "charge_limit": {
+        "name": "Laddningsbegränsning"
+      }
+    }
+  }
+}
