@@ -1,17 +1,252 @@
 {
-    "config": {
-      "step": {
-        "user": {
-          "title": "Konfigurer Garo Wallbox",
-          "description": "Skriv inn IP-adressa til Garo Wallbox.",
-          "data": { "host": "Vert", "name": "Vennleg navn" }
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfigurer Garo Wallbox",
+        "description": "Oppgi IP-adressa til din Garo Wallbox.",
+        "data": {
+          "host": "Vert",
+          "name": "Venleg namn",
+          "device_fetch_interval": "Henteintervall (sekund)",
+          "meter_fetch_interval": "Målarhenteintervall (sekund)"
+        }
+      }
+    },
+    "abort": {
+      "device_timeout": "Tidsavbrot ved tilkopling til eininga.",
+      "device_fail": "Uventa feil ved oppretting av eining.",
+      "already_configured": "Eininga er allereie konfigurert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "host": "Vert",
+          "name": "Venleg namn",
+          "device_fetch_interval": "Henteintervall (sekund)",
+          "meter_fetch_interval": "Målarhenteintervall (sekund)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "sensor": {
+        "state": {
+          "ALWAYS_ON": "Tilgjengeleg for lading",
+          "ALWAYS_OFF": "Ikkje tilgjengeleg for lading",
+          "SCHEMA": "Tidsplan"
         }
       },
-      "abort": {
-        "device_timeout": "Tidsavbrot for tilkopling til eininga.",
-        "device_fail": "Uventa feil under oppretting av eining.",
-        "already_configured": "Eininga er allereie konfigurert"
+      "status": {
+        "name": "Status",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Køyretøy ikkje tilkopla",
+          "CONNECTED": "Vent på startsignal frå bilen",
+          "SEARCH_COMM": "Køyretøy ikkje tilkopla",
+          "RCD_FAULT": "RCD-feil",
+          "CHARGING": "Ladar",
+          "CHARGING_PAUSED": "Ladeprosessen er mellombels stoppa av lastbalanseringssystemet",
+          "CHARGING_FINISHED": "Lading avslutta av bilen",
+          "CHARGING_CANCELLED": "Lading avbroten",
+          "DISABLED": "Lading deaktivert",
+          "OVERHEAT": "Overtemperatur, lading mellombels avgrensa til 6A",
+          "CRITICAL_TEMPERATURE": "Overtemperatur, lading avbroten",
+          "INITIALIZATION": "Initialiserer...",
+          "CABLE_FAULT": "Kabelproblem",
+          "LOCK_FAULT": "Låsefeil",
+          "CONTACTOR_FAULT:": "Kontaktorstopp",
+          "VENT_FAULT": "Ventilasjon nødvendig",
+          "DC_ERROR": "DC-feil oppdaga",
+          "DC_HARDWARE": "DC-deteksjonsfeil, lading deaktivert",
+          "CP_FAULT": "CP-signalfeil, lading stoppa",
+          "CP_SHORTED": "CP-signal kortslutta, lading stoppa",
+          "REMOTE_DISABLED": "Lading eksternt deaktivert",
+          "UNAVAILABLE": "Lading mellombels stoppa",
+          "UNKNOWN": "Kommunikasjonsfeil"
+        }
+      },
+      "current_charging_current": {
+        "name": "Ladestraum"
+      },
+      "current_charging_power": {
+        "name": "Ladeeffekt"
+      },
+      "nr_of_phases": {
+        "name": "Tal på fasar",
+        "state": {
+          "1": "Einfasa",
+          "2": "Tofasa",
+          "3": "Trefasa"
+        }
+      },
+      "current_limit": {
+        "name": "Straumavgrensing"
+      },
+      "pilot_level": {
+        "name": "Pilotnivå"
+      },
+      "acc_session_energy": {
+        "name": "Energiforbruk per økt"
+      },
+      "latest_reading": {
+        "name": "Total energi"
+      },
+      "latest_reading_k": {
+        "name": "Total energi (kWh)"
+      },
+      "current_temperature": {
+        "name": "Temperatur"
+      },
+      "left_status": {
+        "name": "Venstre uttak",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Køyretøy ikkje tilkopla",
+          "CONNECTED": "Vent på startsignal frå bilen",
+          "SEARCH_COMM": "Køyretøy ikkje tilkopla",
+          "RCD_FAULT": "RCD-feil",
+          "CHARGING": "Ladar",
+          "CHARGING_PAUSED": "Ladeprosessen er mellombels stoppa av lastbalanseringssystemet",
+          "CHARGING_FINISHED": "Lading avslutta av bilen",
+          "CHARGING_CANCELLED": "Lading avbroten",
+          "DISABLED": "Lading deaktivert",
+          "OVERHEAT": "Overtemperatur, lading mellombels avgrensa til 6A",
+          "CRITICAL_TEMPERATURE": "Overtemperatur, lading avbroten",
+          "INITIALIZATION": "Initialiserer...",
+          "CABLE_FAULT": "Kabelproblem",
+          "LOCK_FAULT": "Låsefeil",
+          "CONTACTOR_FAULT:": "Kontaktorstopp",
+          "VENT_FAULT": "Ventilasjon nødvendig",
+          "DC_ERROR": "DC-feil oppdaga",
+          "DC_HARDWARE": "DC-deteksjonsfeil, lading deaktivert",
+          "CP_FAULT": "CP-signalfeil, lading stoppa",
+          "CP_SHORTED": "CP-signal kortslutta, lading stoppa",
+          "REMOTE_DISABLED": "Lading eksternt deaktivert",
+          "UNAVAILABLE": "Lading mellombels stoppa",
+          "UNKNOWN": "Kommunikasjonsfeil"
+        }
+      },
+      "left_current_charging_current": {
+        "name": "Venstre ladestraum"
+      },
+      "left_current_charging_power": {
+        "name": "Venstre ladeeffekt"
+      },
+      "left_nr_of_phases": {
+        "name": "Venstre tal på fasar",
+        "state": {
+          "1": "Einfasa",
+          "2": "Tofasa",
+          "3": "Trefasa"
+        }
+      },
+      "left_pilot_level": {
+        "name": "Venstre pilotnivå"
+      },
+      "left_acc_session_energy": {
+        "name": "Venstre energiforbruk per økt"
+      },
+      "left_acc_energy": {
+        "name": "Venstre total energi"
+      },
+      "right_status": {
+        "name": "Høgre uttak",
+        "state": {
+          "CHANGING": "...",
+          "NOT_CONNECTED": "Køyretøy ikkje tilkopla",
+          "CONNECTED": "Vent på startsignal frå bilen",
+          "SEARCH_COMM": "Køyretøy ikkje tilkopla",
+          "RCD_FAULT": "RCD-feil",
+          "CHARGING": "Ladar",
+          "CHARGING_PAUSED": "Ladeprosessen er mellombels stoppa av lastbalanseringssystemet",
+          "CHARGING_FINISHED": "Lading avslutta av bilen",
+          "CHARGING_CANCELLED": "Lading avbroten",
+          "DISABLED": "Lading deaktivert",
+          "OVERHEAT": "Overtemperatur, lading mellombels avgrensa til 6A",
+          "CRITICAL_TEMPERATURE": "Overtemperatur, lading avbroten",
+          "INITIALIZATION": "Initialiserer...",
+          "CABLE_FAULT": "Kabelproblem",
+          "LOCK_FAULT": "Låsefeil",
+          "CONTACTOR_FAULT:": "Kontaktorstopp",
+          "VENT_FAULT": "Ventilasjon nødvendig",
+          "DC_ERROR": "DC-feil oppdaga",
+          "DC_HARDWARE": "DC-deteksjonsfeil, lading deaktivert",
+          "CP_FAULT": "CP-signalfeil, lading stoppa",
+          "CP_SHORTED": "CP-signal kortslutta, lading stoppa",
+          "REMOTE_DISABLED": "Lading eksternt deaktivert",
+          "UNAVAILABLE": "Lading mellombels stoppa",
+          "UNKNOWN": "Kommunikasjonsfeil"
+        }
+      },
+      "right_current_charging_current": {
+        "name": "Høgre ladestraum"
+      },
+      "right_current_charging_power": {
+        "name": "Høgre ladeeffekt"
+      },
+      "right_nr_of_phases": {
+        "name": "Høgre tal på fasar",
+        "state": {
+          "1": "Einfasa",
+          "2": "Tofasa",
+          "3": "Trefasa"
+        }
+      },
+      "right_pilot_level": {
+        "name": "Høgre pilotnivå"
+      },
+      "right_acc_session_energy": {
+        "name": "Høgre energiforbruk per økt"
+      },
+      "right_acc_energy": {
+        "name": "Høgre total energi"
+      }
+    },
+    "select": {
+      "sensor": {
+        "state": {
+          "ALWAYS_ON": "Tilgjengeleg for lading",
+          "ALWAYS_OFF": "Ikkje tilgjengeleg for lading",
+          "SCHEMA": "Tidsplan"
+        }
+      },
+      "outlet": {
+        "name": "Uttak",
+        "state": {
+          "UNLOCKED": "Opna",
+          "LOCKED": "Låst",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Låst med opplåsing ved straumbrot"
+        }
+      },
+      "left_outlet": {
+        "name": "Venstre uttak",
+        "state": {
+          "UNLOCKED": "Opna",
+          "LOCKED": "Låst",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Låst med opplåsing ved straumbrot"
+        }
+      },
+      "right_outlet": {
+        "name": "Høgre uttak",
+        "state": {
+          "UNLOCKED": "Opna",
+          "LOCKED": "Låst",
+          "LOCKED_WITH_POWER_LOSS_UNLOCK": "Låst med opplåsing ved straumbrot"
+        }
+      }
+    },
+    "number": {
+      "current_limit": {
+        "name": "Straumavgrensing"
+      }
+    },
+    "switch": {
+      "charge_limit": {
+        "name": "Ladegrense"
       }
     }
   }
-  
+}
