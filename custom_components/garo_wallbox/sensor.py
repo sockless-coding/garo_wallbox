@@ -48,7 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
     """Set up using config_entry."""
     coordinator = entry.runtime_data.coordinator
     entities:list[SensorEntity] = [
-        GaroSensorEntity(coordinator, entry, description) for description in [            
+        GaroSensorEntity(coordinator, entry, description) for description in [
             GaroSensorEntityDescription(
                 key="status",
                 translation_key="status",
@@ -76,7 +76,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 device_class=SensorDeviceClass.POWER,
                 state_class=SensorStateClass.MEASUREMENT,
                 native_unit_of_measurement=UnitOfPower.WATT,
-                get_state=lambda status: status.current_charging_power,
+                get_state=lambda status: max(status.current_charging_power, 0),
             ),
             GaroSensorEntityDescription(
                 key="nr_of_phases",
@@ -159,7 +159,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
             )
         ]]
     if (coordinator.config.has_twin):
-        entities.extend(GaroSensorEntity(coordinator, entry, description) for description in [    
+        entities.extend(GaroSensorEntity(coordinator, entry, description) for description in [
             GaroSensorEntityDescription(
                 key="left_status",
                 translation_key="left_status",
@@ -319,8 +319,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
         ])
     entities.append(
         GaroLegacySensorEntity(
-            coordinator, 
-            entry, 
+            coordinator,
+            entry,
             GaroSensorEntityDescription(
                 key="sensor",
                 translation_key="sensor",
@@ -332,9 +332,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 get_state=lambda status: status.mode.value,
             )
         ))
-    
+
     def add_charger_entities(charger: GaroCharger):
-        entities.extend(GaroChargerSensorEntity(coordinator, entry, description, charger) for description in [    
+        entities.extend(GaroChargerSensorEntity(coordinator, entry, description, charger) for description in [
             GaroChargerSensorEntityDescription(
                 key="status",
                 translation_key="status",
@@ -423,7 +423,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
     if entry.runtime_data.meter_coordinator:
         meter_coordinator = entry.runtime_data.meter_coordinator
         def add_meter_sentities(meter: GaroMeter, is_3_phase: bool = True):
-            entities.extend(GaroMeterSensorEntity(meter_coordinator, entry, description, meter) for description in [    
+            entities.extend(GaroMeterSensorEntity(meter_coordinator, entry, description, meter) for description in [
                 GaroMeterSensorEntityDescription(
                     key="meter_l1_current",
                     translation_key="meter_l1_current",
@@ -500,7 +500,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                     native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
                     get_state=lambda meter: meter.accumulated_energy,
                 )])
-        
+
         if meter_coordinator.has_external_meter:
             add_meter_sentities(meter_coordinator.external_meter, meter_coordinator.external_meter.type not in [103,104])
         if meter_coordinator.has_central100_meter:
@@ -554,25 +554,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
             },
             "async_remove_schedule",
         )
-        
+
 
 
 
 class GaroSensorEntity(GaroEntity, SensorEntity):
-    
+
     entity_description: GaroSensorEntityDescription
 
     def __init__(self, coordinator: GaroDeviceCoordinator, entry, description: GaroSensorEntityDescription):
         self.entity_description = description
         super().__init__(coordinator, entry, description.key)
 
-  
+
     def _async_update_attrs(self) -> None:
         """Update the attributes of the sensor."""
         self._attr_native_value = self.entity_description.get_state(self.coordinator.status)
 
 class GaroChargerSensorEntity(GaroEntity, SensorEntity):
-    
+
     entity_description: GaroChargerSensorEntityDescription
 
     def __init__(self, coordinator: GaroDeviceCoordinator, entry, description: GaroChargerSensorEntityDescription, charger: GaroCharger):
@@ -580,13 +580,13 @@ class GaroChargerSensorEntity(GaroEntity, SensorEntity):
         self._charger = charger
         super().__init__(coordinator, entry, description.key, charger)
 
-  
+
     def _async_update_attrs(self) -> None:
         """Update the attributes of the sensor."""
         self._attr_native_value = self.entity_description.get_state(self._charger)
 
 class GaroMeterSensorEntity(GaroMeterEntity, SensorEntity):
-    
+
     entity_description: GaroMeterSensorEntityDescription
 
     def __init__(self, coordinator: GaroMeterCoordinator, entry, description: GaroMeterSensorEntityDescription, meter: GaroMeter):
@@ -594,7 +594,7 @@ class GaroMeterSensorEntity(GaroMeterEntity, SensorEntity):
         self._meter = meter
         super().__init__(coordinator, entry, description.key, meter)
 
-  
+
     def _async_update_attrs(self) -> None:
         """Update the attributes of the sensor."""
         self._attr_native_value = self.entity_description.get_state(self._meter)
@@ -609,7 +609,7 @@ class GaroLegacySensorEntity(GaroSensorEntity):
         await self.coordinator.api_client.async_set_current_limit(limit)
 
 class GaroScheduleSensorEntity(GaroEntity, SensorEntity):
-    
+
 
     def __init__(self, coordinator: GaroDeviceCoordinator, entry):
         self.entity_description = SensorEntityDescription(
@@ -620,13 +620,13 @@ class GaroScheduleSensorEntity(GaroEntity, SensorEntity):
             state_class=None
         )
         super().__init__(coordinator, entry, self.entity_description.key)
-  
+
     def _async_update_attrs(self) -> None:
         """Update the attributes of the sensor."""
         self._entries = self.coordinator.schema
         self._attr_native_value = len(self._entries)
         _LOGGER.debug(f"Updated schedule entries: {len(self._entries)}")
-        
+
     @property
     def entries(self):
         return [{
@@ -644,14 +644,14 @@ class GaroScheduleSensorEntity(GaroEntity, SensorEntity):
             "entries": self.entries,
         }
         return output
-    
+
     async def async_add_schedule(self, start:str|time, stop:str|time, day_of_the_week: const.SchemaDayOfWeek | int, charge_limit: int = 0):
         if isinstance(day_of_the_week, const.SchemaDayOfWeek):
             day_of_the_week = day_of_the_week.value
         await self.coordinator.async_set_schema(0, start, stop, day_of_the_week, charge_limit)
         self._async_update_attrs()
         self.async_write_ha_state()
-    
+
     async def async_set_schedule(self, id:int, start: str|time, stop:str|time, day_of_the_week: const.SchemaDayOfWeek | int, charge_limit: int = 0):
         if isinstance(day_of_the_week, const.SchemaDayOfWeek):
             day_of_the_week = day_of_the_week.value
