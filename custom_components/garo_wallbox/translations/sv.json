@@ -245,7 +245,7 @@
     },
     "switch": {
       "charge_limit": {
-        "name": "Laddningsbegränsning"
+        "name": "Laddströmsbegränsning"
       }
     }
   }
