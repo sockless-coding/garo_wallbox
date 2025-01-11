@@ -24,7 +24,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
     """Set up using config_entry."""
     coordinator = entry.runtime_data.coordinator
     entities:list[SwitchEntity] = [
-        PanasonicSwitchEntity(coordinator, entry, description) for description in [
+        GaroSwitchEntity(coordinator, entry, description) for description in [
             GaroSwitchEntityDescription(
                 key="charge_limit",
                 translation_key="charge_limit",
@@ -38,7 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
     if entry.runtime_data.meter_coordinator:
         meter_coordinator = entry.runtime_data.meter_coordinator
         def add_meter_entities(meter: GaroMeter):
-            entities.extend(GaroMeterSwitchEntity(meter_coordinator, entry, description, meter) for description in [    
+            entities.extend(GaroMeterSwitchEntity(meter_coordinator, entry, description, meter) for description in [
                 GaroSwitchEntityDescription(
                     key="meter_calculate_power",
                     translation_key="meter_calculate_power",
@@ -57,9 +57,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
             add_meter_entities(meter_coordinator.central101_meter)
 
     async_add_entities(entities)
-    
 
-class PanasonicSwitchEntity(GaroEntity, SwitchEntity):
+
+class GaroSwitchEntity(GaroEntity, SwitchEntity):
     """Representation of a Garo switch."""
     entity_description: GaroSwitchEntityDescription
 
@@ -69,11 +69,11 @@ class PanasonicSwitchEntity(GaroEntity, SwitchEntity):
         self._always_available = always_available
         super().__init__(coordinator, entry, description.key)
 
- 
+
     def _async_update_attrs(self) -> None:
         """Update the attributes of the sensor."""
         self._attr_is_on = self.entity_description.get_state()
-        
+
 
     async def async_turn_on(self, **kwargs):
         """Turn on the Switch."""
@@ -96,11 +96,11 @@ class GaroMeterSwitchEntity(GaroMeterEntity, SwitchEntity):
         self.entity_description = description
         super().__init__(coordinator, entry, description.key, meter)
 
- 
+
     def _async_update_attrs(self) -> None:
         """Update the attributes of the sensor."""
         self._attr_is_on = self.entity_description.get_state()
-        
+
 
     async def async_turn_on(self, **kwargs):
         """Turn on the Switch."""
