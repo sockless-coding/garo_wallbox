@@ -3,29 +3,39 @@
     "step": {
       "user": {
         "title": "Configure Garo Wallbox",
-        "description": "Enter IP address of your Garo Wallbox.",
+        "description": "Enter the IP address or hostname of your Garo Wallbox.",
         "data": {
           "host": "Host",
-          "name": "Friendly name",
-          "device_fetch_interval": "Fetch interval (seconds)",
-          "meter_fetch_interval": "Meter fetch interval (seconds)"
+          "name": "Friendly name"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Garo Wallbox",
+        "description": "Update the IP address or hostname used to reach your Garo Wallbox.",
+        "data": {
+          "host": "Host",
+          "name": "Friendly name"
         }
       }
     },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "unknown": "Unexpected error"
+    },
     "abort": {
-      "device_timeout": "Timeout connecting to the device.",
-      "device_fail": "Unexpected error creating device.",
-      "already_configured": "Device is already configured"
+      "already_configured": "Device is already configured",
+      "reconfigure_successful": "Reconfiguration was successful",
+      "wrong_device": "The host does not match the wallbox this entry was set up for"
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "Garo Wallbox options",
+        "description": "How often Home Assistant polls the wallbox and its energy meter.",
         "data": {
-          "host": "Host",
-          "name": "Friendly name",
-          "device_fetch_interval": "Fetch interval (seconds)",
-          "meter_fetch_interval": "Meter fetch interval (seconds)"
+          "device_fetch_interval": "Device poll interval (seconds)",
+          "meter_fetch_interval": "Meter poll interval (seconds)"
         }
       }
     }

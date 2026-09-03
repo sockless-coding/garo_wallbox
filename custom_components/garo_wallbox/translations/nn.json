@@ -3,29 +3,39 @@
     "step": {
       "user": {
         "title": "Konfigurer Garo Wallbox",
-        "description": "Oppgi IP-adressa til din Garo Wallbox.",
+        "description": "Oppgi IP-adressa eller vertsnamnet til din Garo Wallbox.",
         "data": {
           "host": "Vert",
-          "name": "Venleg namn",
-          "device_fetch_interval": "Henteintervall (sekund)",
-          "meter_fetch_interval": "Målarhenteintervall (sekund)"
+          "name": "Venleg namn"
+        }
+      },
+      "reconfigure": {
+        "title": "Rekonfigurer Garo Wallbox",
+        "description": "Oppdater IP-adressa eller vertsnamnet som vert brukt for å nå din Garo Wallbox.",
+        "data": {
+          "host": "Vert",
+          "name": "Venleg namn"
         }
       }
     },
+    "error": {
+      "cannot_connect": "Klarte ikkje å kople til",
+      "unknown": "Uventa feil"
+    },
     "abort": {
-      "device_timeout": "Tidsavbrot ved tilkopling til eininga.",
-      "device_fail": "Uventa feil ved oppretting av eining.",
-      "already_configured": "Eininga er allereie konfigurert."
+      "already_configured": "Eininga er allereie konfigurert.",
+      "reconfigure_successful": "Rekonfigurasjonen var vellukka",
+      "wrong_device": "Verten samsvarar ikkje med wallboxen denne oppføringa vart sett opp for"
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "Alternativ for Garo Wallbox",
+        "description": "Kor ofte Home Assistant hentar data frå wallboxen og energimålaren.",
         "data": {
-          "host": "Vert",
-          "name": "Venleg namn",
-          "device_fetch_interval": "Henteintervall (sekund)",
-          "meter_fetch_interval": "Målarhenteintervall (sekund)"
+          "device_fetch_interval": "Henteintervall for eining (sekund)",
+          "meter_fetch_interval": "Henteintervall for målar (sekund)"
         }
       }
     }
