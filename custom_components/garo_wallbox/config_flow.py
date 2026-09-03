@@ -39,10 +39,10 @@ class FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_abort(reason="already_configured")
 
         return self.async_create_entry(
-            title=host, 
+            title=host,
             data={
-                CONF_HOST: host, 
-                CONF_NAME: name,
+                CONF_HOST: host,
+                CONF_NAME: name or host,
             },
             options={                
                 CONF_DEVICE_FETCH_INTERVAL: device_fetch_interval or DEFAULT_DEVICE_FETCH_INTERVAL,
@@ -85,17 +85,17 @@ class FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 })
             )
         return await self._create_device(
-            user_input[CONF_HOST], 
-            user_input[CONF_NAME],
-            user_input[CONF_DEVICE_FETCH_INTERVAL],
-            user_input[CONF_METER_FETCH_INTERVAL])
+            user_input[CONF_HOST],
+            user_input.get(CONF_NAME),
+            user_input.get(CONF_DEVICE_FETCH_INTERVAL),
+            user_input.get(CONF_METER_FETCH_INTERVAL))
 
     async def async_step_import(self, user_input):
         """Import a config entry."""
         host = user_input.get(CONF_HOST)
         if not host:
             return await self.async_step_user()
-        return await self._create_device(host, user_input[CONF_NAME])
+        return await self._create_device(host, user_input.get(CONF_NAME))
 
     async def async_step_discovery(self, user_input):
         """Initialize step from discovery."""

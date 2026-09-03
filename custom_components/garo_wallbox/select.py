@@ -76,7 +76,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                     name= "Outlet",
                     icon="mdi:ev-plug-type2",
                     options=[opt.name for opt in const.CableLockMode],
-                    set_option=lambda option: coordinator.async_set_cable_lock_mode(slave.serial_number, option),
+                    set_option=lambda option, s=slave: coordinator.async_set_cable_lock_mode(s.serial_number, option),
                     get_current_option=lambda charger: charger.cable_lock_mode.name),
                     slave))
     async_add_entities(entries)

@@ -159,7 +159,7 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
                         break
             if has_changed:
                 self._update_id += 1
-        except BaseException as e:
+        except Exception as e:
             _LOGGER.error("Error fetching device data from API: %s", e, exc_info=e)
             raise UpdateFailed(f"Invalid response from API: {e}") from e
         return self._update_id
@@ -274,7 +274,7 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
             
             if has_changed:
                 self._update_id += 1
-        except BaseException as e:
+        except Exception as e:
             _LOGGER.error("Error fetching meter data from API: %s", e, exc_info=e)
             raise UpdateFailed(f"Invalid response from API: {e}") from e
         return self._update_id

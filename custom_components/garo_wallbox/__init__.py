@@ -110,6 +110,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry):
                     identifiers=meter_coordinator.get_device_info(meter_coordinator.central101_meter).get("identifiers"),
                     manufacturer="Garo")
 
+        entry.async_on_unload(entry.add_update_listener(async_update_options))
+
         await hass.config_entries.async_forward_entry_setups(entry, COMPONENT_TYPES)
         return True
     except asyncio.TimeoutError:
@@ -126,6 +128,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry):
 async def async_unload_entry(hass: HomeAssistant, entry):
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, COMPONENT_TYPES)
+
+async def async_update_options(hass: HomeAssistant, entry: GaroConfigEntry) -> None:
+    """Reload the entry when its options are updated."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 async def garo_setup(hass: HomeAssistant, entry: ConfigEntry):
     """Create a Garo instance only once."""
