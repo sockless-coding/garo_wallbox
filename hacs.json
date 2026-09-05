@@ -1,3 +1,5 @@
 {
-    "name": "Garo Wallbox"
+    "name": "Garo Wallbox",
+    "render_readme": true,
+    "homeassistant": "2024.10.0"
 }

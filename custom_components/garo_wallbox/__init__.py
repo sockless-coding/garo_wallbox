@@ -57,12 +57,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry):
     host = entry.data[CONF_HOST]
     api_client = ApiClient(session, host)
     try:
-        with timeout(TIMEOUT):
+        async with timeout(TIMEOUT):
             configuration = await api_client.async_get_configuration()
         coordinator = GaroDeviceCoordinator(hass, entry, api_client, configuration)
         await coordinator.async_config_entry_first_refresh()
         try:
-            with timeout(5):
+            async with timeout(5):
                 await coordinator.async_fetch_schema()
         except Exception:
             _LOGGER.exception("Failed to fetch schema")
@@ -139,7 +139,7 @@ async def garo_setup(hass: HomeAssistant, entry: ConfigEntry):
     host = entry.data[CONF_HOST]
     api_client = ApiClient(session, host)
     try:
-        with timeout(TIMEOUT):
+        async with timeout(TIMEOUT):
             configuration = await api_client.async_get_configuration()
         return GaroDeviceCoordinator(hass, entry, api_client, configuration)
 
