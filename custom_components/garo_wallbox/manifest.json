@@ -2,9 +2,11 @@
     "domain": "garo_wallbox",
     "name": "Garo Wallbox",
     "version": "2024.10.0",
-    "config_flow": true,    
+    "config_flow": true,
     "documentation": "https://github.com/sockless-coding/garo_wallbox/",
+    "issue_tracker": "https://github.com/sockless-coding/garo_wallbox/issues",
     "dependencies": [],
-    "codeowners": ["sockless-coding"]
+    "codeowners": ["sockless-coding"],
+    "iot_class": "local_polling",
+    "integration_type": "device"
   }
-  

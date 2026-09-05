@@ -118,13 +118,13 @@ class ApiClient:
         response = await self._async_get('config', True)
         response_json = await response.json()
         response_json['reducedCurrentIntervals'] = [{
-            'chargeLimit': str(limit),
+            'chargeLimit': int(limit),
             'schemaId': 1,
             'start': '00:00:00',
-            'stop':'24:00:00',
+            'stop': '24:00:00',
             'weekday': 8
         }]
-        response = await self._async_post(self._get_url('config'), data=response_json)
+        response = await self._async_post(self._get_url('currentlimit'), data=response_json)
         await response.text()
 
     async def async_enable_charge_limit(self, enable: bool):
@@ -160,18 +160,31 @@ class ApiClient:
     
     async def _async_post(self, url: str, data=None):
         response = await self._client.request(
-            method='POST', 
-            url=url, 
+            method='POST',
+            url=url,
             json=data,
             headers={'content-type': 'application/json; charset=utf-8'})
+        await self._raise_for_status(response, 'POST', url)
         return response
-    
+
     async def _async_delete(self, url: str):
         response = await self._client.request(
-            method='DELETE', 
-            url=url, 
+            method='DELETE',
+            url=url,
             headers={'content-type': 'application/json; charset=utf-8'})
+        await self._raise_for_status(response, 'DELETE', url)
         return response
+
+    async def _raise_for_status(self, response, method: str, url: str):
+        if response.status < 300:
+            return
+        body = ''
+        try:
+            body = await response.text()
+        except Exception:  # pragma: no cover - best effort diagnostics
+            pass
+        _LOGGER.error('%s %s failed with status %s: %s', method, url, response.status, body)
+        raise ConnectionError(f'{method} {url} failed with status {response.status}')
 
     def _get_url(self, action, add_tick = False):
         tick = '' if add_tick == False else '?_={}'.format(current_milli_time())

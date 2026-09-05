@@ -15,10 +15,10 @@ class GaroConfig:
         self.software_version = utils.read_value(json,'softwareVersion', 0)
         self.package_version = utils.read_value(json, 'packageVersion', '0')
         self.twin_serial = utils.read_value(json, 'twinSerial', 0)
-        self.standalone = bool(utils.read_value(json,'standalone', 'false'))
-        self.local_load_balanced = bool(utils.read_value(json,'localLoadBalanced', 'false'))
-        self.group_load_balanced = bool(utils.read_value(json,'groupLoadBalanced', 'false'))
-        self.group_load_balanced101 = bool(utils.read_value(json,'groupLoadBalanced101', 'false'))
+        self.standalone = utils.read_bool(json, 'standalone', False)
+        self.local_load_balanced = utils.read_bool(json, 'localLoadBalanced', False)
+        self.group_load_balanced = utils.read_bool(json, 'groupLoadBalanced', False)
+        self.group_load_balanced101 = utils.read_bool(json, 'groupLoadBalanced101', False)
 
 
         slaves = utils.read_value(json, 'slaveList', [])
