@@ -31,6 +31,14 @@
                     "3":"mdi:google-circles-communities"
                 }
             },
+            "power_mode": {
+                "state": {
+                    "ON": "mdi:electric-switch-closed",
+                    "OFF": "mdi:electric-switch",
+                    "UNKNOWN": "mdi:help",
+                    "UNAVAILABLE": "mdi:help"
+                }
+            },
             "left_status": {
                 "state": {
                     "CHANGING": "mdi:update",

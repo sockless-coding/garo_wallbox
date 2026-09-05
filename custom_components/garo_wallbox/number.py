@@ -77,6 +77,34 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
             add_meter_entities(meter_coordinator.central100_meter)
         if meter_coordinator.has_central101_meter:
             add_meter_entities(meter_coordinator.central101_meter)
+
+        def add_lb_fuse_entity(meter: GaroMeter, get_fuse: Callable[[], int], set_fuse: Callable[[int], Awaitable]):
+            max_fuse = 2500 if configuration.lb_version2 else 63
+            entities.append(GaroMeterNumberEntity(meter_coordinator, entry, GaroMeterNumberEntityDescription(
+                key="lb_main_fuse",
+                translation_key="lb_main_fuse",
+                name="Main Fuse",
+                icon="mdi:gauge-full",
+                native_max_value=max_fuse,
+                native_min_value=16,
+                native_step=1,
+                native_unit_of_measurement="A",
+                mode=NumberMode.BOX,
+                get_value=lambda status: get_fuse(),
+                set_value=set_fuse,
+                is_available=lambda: True,
+            ), meter))
+        if meter_coordinator.has_lb_config:
+            if meter_coordinator.has_central100_meter:
+                add_lb_fuse_entity(
+                    meter_coordinator.central100_meter,
+                    lambda: meter_coordinator.lb_config.fuse,
+                    meter_coordinator.async_set_lb_fuse)
+            if meter_coordinator.has_central101_meter:
+                add_lb_fuse_entity(
+                    meter_coordinator.central101_meter,
+                    lambda: meter_coordinator.lb_config.fuse101,
+                    meter_coordinator.async_set_lb_fuse101)
     async_add_entities(entities)
 
 

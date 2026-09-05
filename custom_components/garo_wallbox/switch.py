@@ -35,6 +35,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 get_state=lambda: coordinator.config.charge_limit_enabled,
             ),
         ]]
+    if coordinator.config.rfid_reader_present:
+        entities.append(GaroSwitchEntity(coordinator, entry, GaroSwitchEntityDescription(
+            key="rfid_enabled",
+            translation_key="rfid_enabled",
+            name="RFID Authorization",
+            icon="mdi:card-account-details-outline",
+            on_func=lambda: coordinator.async_set_rfid_mode(True),
+            off_func=lambda: coordinator.async_set_rfid_mode(False),
+            get_state=lambda: coordinator.config.rfid_enabled,
+        )))
     if entry.runtime_data.meter_coordinator:
         meter_coordinator = entry.runtime_data.meter_coordinator
         def add_meter_entities(meter: GaroMeter):

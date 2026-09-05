@@ -110,6 +110,18 @@
       "current_temperature": {
         "name": "Temperature"
       },
+      "power_mode": {
+        "name": "Power Mode",
+        "state": {
+          "ON": "Power on",
+          "OFF": "Power off",
+          "UNKNOWN": "Unknown",
+          "UNAVAILABLE": "Unavailable"
+        }
+      },
+      "charge_status": {
+        "name": "Charge Status Code"
+      },
       "left_status": {
         "name": "Left Outlet",
         "state": {
@@ -162,6 +174,9 @@
       "left_acc_energy": {
         "name": "Left Total Energy"
       },
+      "left_charge_status": {
+        "name": "Left Charge Status Code"
+      },
       "right_status": {
         "name": "Right Outlet",
         "state": {
@@ -213,6 +228,9 @@
       },
       "right_acc_energy": {
         "name": "Right Total Energy"
+      },
+      "right_charge_status": {
+        "name": "Right Charge Status Code"
       }
     },
     "select": {
@@ -251,11 +269,27 @@
     "number": {
       "current_limit": {
         "name": "Current Limit"
+      },
+      "lb_main_fuse": {
+        "name": "Main Fuse"
       }
     },
     "switch": {
       "charge_limit": {
         "name": "Charge Limiter"
+      },
+      "rfid_enabled": {
+        "name": "RFID Authorization"
+      }
+    },
+    "button": {
+      "restart": {
+        "name": "Restart"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Firmware"
       }
     }
   }

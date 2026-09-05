@@ -8,7 +8,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.storage import Store
 
-from .garo import ApiClient, GaroConfig, GaroStatus, GaroCharger, GaroMeter, GaroSchema
+from .garo import ApiClient, GaroConfig, GaroStatus, GaroCharger, GaroMeter, GaroSchema, GaroLBConfig
 from .garo.const import CableLockMode, PRODUCT_MAP, GaroProductInfo, Mode as GaroMode
 from . import const
 
@@ -146,6 +146,13 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
         await self._api_client.async_set_current_limit(limit)
         await self.async_request_refresh()
 
+    async def async_set_rfid_mode(self, enabled: bool):
+        await self._api_client.async_set_rfid_mode(enabled)
+        self._config = await self._api_client.async_get_configuration()
+        self.async_update_listeners()
+
+    async def async_restart(self):
+        await self._api_client.async_restart()
 
     async def _fetch_device_data(self)->int:
         try:
@@ -180,6 +187,7 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
         self._external_meter: GaroMeter | None = None
         self._central100_meter: GaroMeter | None = None
         self._central101_meter: GaroMeter | None = None
+        self._lb_config: GaroLBConfig | None = None
         self._store = Store(hass, version=1, key="garo_meter")
         self._stored_data: dict|None = None
         
@@ -212,6 +220,15 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
             raise ValueError("Central 101 meter not initialized")
         return self._central101_meter
     
+    @property
+    def has_lb_config(self) -> bool:
+        return self._lb_config is not None
+    @property
+    def lb_config(self)->GaroLBConfig:
+        if not self._lb_config:
+            raise ValueError("Load balancing config not initialized")
+        return self._lb_config
+
     @property
     def calculate_power(self)->bool:
         if self._stored_data is None:
@@ -252,6 +269,13 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
         await self._store.async_save(self._stored_data)
         self.async_update_listeners()
 
+    async def async_set_lb_fuse(self, fuse: int):
+        await self._api_client.async_set_lb_fuse(fuse)
+        await self.async_request_refresh()
+
+    async def async_set_lb_fuse101(self, fuse: int):
+        await self._api_client.async_set_lb_fuse101(fuse)
+        await self.async_request_refresh()
 
     async def _fetch_device_data(self)->int:
         try:
@@ -271,7 +295,11 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
                 self._central101_meter = await self._api_client.async_get_central101_meter(self._central101_meter)
                 if self._central101_meter.has_changed:
                     has_changed = True
-            
+            if self._config.group_load_balanced or self._config.group_load_balanced101:
+                self._lb_config = await self._api_client.async_get_lb_config(self._lb_config)
+                if self._lb_config.has_changed:
+                    has_changed = True
+
             if has_changed:
                 self._update_id += 1
         except Exception as e:

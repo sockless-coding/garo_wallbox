@@ -8,6 +8,7 @@ from .garoconfig import GaroConfig
 from .garocharger import GaroCharger
 from .garometer import GaroMeter
 from .garoschema import GaroSchema
+from .garolbconfig import GaroLBConfig
 from . import const
 
 _LOGGER = logging.getLogger(__name__)
@@ -145,7 +146,49 @@ class ApiClient:
             await response.text()
             return
         raise ValueError('Slave with serial number {} not found'.format(serial_number))
-        
+
+    async def async_get_lb_config(self, lb_config: GaroLBConfig | None = None) -> GaroLBConfig:
+        response = await self._async_get('lbconfig/false')
+        data = await response.json()
+        if lb_config is None:
+            lb_config = GaroLBConfig(data)
+        else:
+            lb_config.load(data)
+        return lb_config
+
+    async def async_set_lb_fuse(self, fuse: int):
+        response = await self._async_get('lbconfig/false', True)
+        response_json = await response.json()
+        response_json['loadBalancingFuse'] = fuse
+        response = await self._async_post(self._get_url('lbconfig'), data=response_json)
+        await response.text()
+
+    async def async_set_lb_fuse101(self, fuse: int):
+        response = await self._async_get('lbconfig/false', True)
+        response_json = await response.json()
+        response_json['loadBalancingFuse101'] = fuse
+        response = await self._async_post(self._get_url('lbconfig'), data=response_json)
+        await response.text()
+
+    async def async_set_rfid_mode(self, enabled: bool):
+        response = await self._async_post(self._get_url(f'rfidmode/{str(enabled).lower()}'))
+        await response.text()
+
+    async def async_restart(self):
+        response = await self._async_get('warmreset')
+        await response.text()
+
+    async def async_get_update_info(self) -> dict:
+        response = await self._async_get('updatecheck', True)
+        return await response.json()
+
+    async def async_install_update(self, url: str, version):
+        response = await self._client.request(
+            method='POST',
+            url=f'http://{self._host}:8080/update/UpdaterServlet',
+            data={'url': url, 'version': version})
+        await self._raise_for_status(response, 'POST', 'UpdaterServlet')
+        return await response.json()
 
     async def _async_get(self, action: str, add_tick = False):
         response = await self._client.request(method='GET', url=self._get_url(action, add_tick))

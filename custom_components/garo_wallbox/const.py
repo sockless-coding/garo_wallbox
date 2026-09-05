@@ -18,6 +18,6 @@ SERVICE_SET_SCHEDULE = "set_schedule"
 SERVICE_REMOVE_SCHEDULE = "remove_schedule"
 
 COORDINATOR = "coordinator"
-COMPONENT_TYPES = ["sensor","select","number","switch"]
+COMPONENT_TYPES = ["sensor","select","number","switch","button","update"]
 
 ATTR_MODES = "modes"
