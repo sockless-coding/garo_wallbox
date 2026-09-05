@@ -1,12 +1,13 @@
 {
-    "domain": "garo_wallbox",
-    "name": "Garo Wallbox",
-    "version": "2024.10.0",
-    "config_flow": true,
-    "documentation": "https://github.com/sockless-coding/garo_wallbox/",
-    "issue_tracker": "https://github.com/sockless-coding/garo_wallbox/issues",
-    "dependencies": [],
-    "codeowners": ["sockless-coding"],
-    "iot_class": "local_polling",
-    "integration_type": "device"
-  }
+  "domain": "garo_wallbox",
+  "name": "Garo Wallbox",
+  "codeowners": ["@sockless-coding"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/sockless-coding/garo_wallbox/",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/sockless-coding/garo_wallbox/issues",
+  "requirements": [],
+  "version": "2024.10.0"
+}
