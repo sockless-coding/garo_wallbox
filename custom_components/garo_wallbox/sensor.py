@@ -8,7 +8,7 @@ import voluptuous as vol
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTemperature, UnitOfElectricCurrent, UnitOfEnergy, UnitOfPower, UnitOfTime
+from homeassistant.const import UnitOfTemperature, UnitOfElectricCurrent, UnitOfEnergy, UnitOfPower, UnitOfTime, EntityCategory
 from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
@@ -156,6 +156,26 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 state_class=SensorStateClass.MEASUREMENT,
                 native_unit_of_measurement=UnitOfTemperature.CELSIUS,
                 get_state=lambda status: status.current_temperature,
+            ),
+            GaroSensorEntityDescription(
+                key="power_mode",
+                translation_key="power_mode",
+                name="Power Mode",
+                icon="mdi:electric-switch",
+                options=[opt.value for opt in const.PowerMode],
+                device_class=SensorDeviceClass.ENUM,
+                state_class=None,
+                get_state=lambda status: status.power_mode.value,
+            ),
+            GaroSensorEntityDescription(
+                key="charge_status",
+                translation_key="charge_status",
+                name="Charge Status Code",
+                icon="mdi:code-tags",
+                entity_category=EntityCategory.DIAGNOSTIC,
+                entity_registry_enabled_default=False,
+                state_class=None,
+                get_state=lambda status: hex(status.charge_status),
             )
         ]]
     if (coordinator.config.has_twin):
@@ -239,6 +259,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 get_state=lambda status: status.main_charger.accumulated_energy / 1000 if status.main_charger.accumulated_energy else None,
             ),
             GaroSensorEntityDescription(
+                key="left_charge_status",
+                translation_key="left_charge_status",
+                name="Left Charge Status Code",
+                icon="mdi:code-tags",
+                entity_category=EntityCategory.DIAGNOSTIC,
+                entity_registry_enabled_default=False,
+                state_class=None,
+                get_state=lambda status: hex(status.main_charger.charge_status),
+            ),
+            GaroSensorEntityDescription(
                 key="right_status",
                 translation_key="right_status",
                 name="Right Status",
@@ -315,6 +345,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 state_class=SensorStateClass.TOTAL_INCREASING,
                 native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
                 get_state=lambda status: status.twin_charger.accumulated_energy / 1000 if status.twin_charger.accumulated_energy else None,
+            ),
+            GaroSensorEntityDescription(
+                key="right_charge_status",
+                translation_key="right_charge_status",
+                name="Right Charge Status Code",
+                icon="mdi:code-tags",
+                entity_category=EntityCategory.DIAGNOSTIC,
+                entity_registry_enabled_default=False,
+                state_class=None,
+                get_state=lambda status: hex(status.twin_charger.charge_status),
             ),
         ])
     entities.append(
@@ -412,6 +452,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: GaroConfigEntry, async_a
                 state_class=SensorStateClass.TOTAL_INCREASING,
                 native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
                 get_state=lambda charger: charger.accumulated_energy / 1000 if charger.accumulated_energy else None,
+            ),
+            GaroChargerSensorEntityDescription(
+                key="charge_status",
+                translation_key="charge_status",
+                name="Charge Status Code",
+                icon="mdi:code-tags",
+                entity_category=EntityCategory.DIAGNOSTIC,
+                entity_registry_enabled_default=False,
+                state_class=None,
+                get_state=lambda charger: hex(charger.charge_status),
             )
         ])
     entities.append(GaroScheduleSensorEntity(coordinator, entry))

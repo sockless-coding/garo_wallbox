@@ -19,6 +19,9 @@ class GaroConfig:
         self.local_load_balanced = utils.read_bool(json, 'localLoadBalanced', False)
         self.group_load_balanced = utils.read_bool(json, 'groupLoadBalanced', False)
         self.group_load_balanced101 = utils.read_bool(json, 'groupLoadBalanced101', False)
+        self.lb_version2 = utils.read_bool(json, 'lbVersion2', False)
+        self.rfid_reader_present = utils.read_bool(json, 'rfidReaderPresent', False)
+        self.rfid_mode = utils.read_value(json, 'rfidMode', 'NONE')
 
 
         slaves = utils.read_value(json, 'slaveList', [])
@@ -61,4 +64,8 @@ class GaroConfig:
     @property
     def has_load_balancer(self):
         return self.local_load_balanced or self.group_load_balanced or self.group_load_balanced101
+
+    @property
+    def rfid_enabled(self):
+        return self.rfid_mode == 'RFID_WIFI'
 
