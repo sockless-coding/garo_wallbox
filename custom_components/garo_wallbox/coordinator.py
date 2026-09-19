@@ -80,9 +80,7 @@ class GaroDeviceCoordinator(DataUpdateCoordinator[int]):
             sw_version=self._config.package_version,
             hw_version=f"{self._config.firmware_version}.{self._config.firmware_revision}"
         )
-    
 
-    
     def get_charger_device_info(self, charger: GaroCharger)->DeviceInfo:
         product = self.get_product_info(charger)
         return DeviceInfo(            
@@ -270,12 +268,16 @@ class GaroMeterCoordinator(DataUpdateCoordinator[int]):
         self.async_update_listeners()
 
     async def async_set_lb_fuse(self, fuse: int):
-        await self._api_client.async_set_lb_fuse(fuse)
-        await self.async_request_refresh()
+        self._lb_config = await self._api_client.async_set_lb_fuse(fuse)
+        self.async_update_listeners()
 
     async def async_set_lb_fuse101(self, fuse: int):
-        await self._api_client.async_set_lb_fuse101(fuse)
-        await self.async_request_refresh()
+        self._lb_config = await self._api_client.async_set_lb_fuse101(fuse)
+        self.async_update_listeners()
+
+    async def async_set_lb_enabled(self, enabled: bool):
+        self._lb_config = await self._api_client.async_set_lb_enabled(enabled)
+        self.async_update_listeners()
 
     async def _fetch_device_data(self)->int:
         try:

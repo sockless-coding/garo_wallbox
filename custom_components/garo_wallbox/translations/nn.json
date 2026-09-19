@@ -32,10 +32,11 @@
     "step": {
       "init": {
         "title": "Alternativ for Garo Wallbox",
-        "description": "Kor ofte Home Assistant hentar data frå wallboxen og energimålaren.",
+        "description": "Kor ofte Home Assistant hentar data frå wallboxen og energimålaren, samt avanserte innstillingar for lastbalansering.",
         "data": {
           "device_fetch_interval": "Henteintervall for eining (sekund)",
-          "meter_fetch_interval": "Henteintervall for målar (sekund)"
+          "meter_fetch_interval": "Henteintervall for målar (sekund)",
+          "allow_low_dlm_current": "Tillat DLM-straumgrenser ned til 5 A"
         }
       }
     }
@@ -251,11 +252,20 @@
     "number": {
       "current_limit": {
         "name": "Straumavgrensing"
+      },
+      "load_balancing_current_100": {
+        "name": "Straumgrense for målar 100"
+      },
+      "load_balancing_current_101": {
+        "name": "Straumgrense for målar 101"
       }
     },
     "switch": {
       "charge_limit": {
         "name": "Ladegrense"
+      },
+      "load_balancing_enabled": {
+        "name": "Lastbalansering"
       }
     }
   }

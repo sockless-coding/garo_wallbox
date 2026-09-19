@@ -1,7 +1,9 @@
-import aiohttp
+import asyncio
+import datetime
 import logging
 import time
-import datetime
+
+import aiohttp
 
 from .garostatus import GaroStatus
 from .garoconfig import GaroConfig
@@ -25,6 +27,7 @@ class ApiClient:
         self._has_meter_info = False
         self._current_divider = 1
         self._power_divider = 1
+        self._lb_config_lock = asyncio.Lock()
 
 
     async def async_get_status(self, status: GaroStatus | None = None):
@@ -156,19 +159,42 @@ class ApiClient:
             lb_config.load(data)
         return lb_config
 
+    async def async_set_lb_value(self, field: str, value: int) -> GaroLBConfig:
+        """Set one LB value while preserving and reading back the full config."""
+        valid_fields = {
+            'loadBalancingFuse',
+            'loadBalancingFuse101',
+        }
+        if field not in valid_fields:
+            raise ValueError(f'Unsupported load-balancing field: {field}')
+
+        async with self._lb_config_lock:
+            response = await self._async_get('lbconfig/false', True)
+            response_json = await response.json()
+            response_json[field] = int(value)
+            response = await self._async_post(
+                self._get_url('lbconfig'), data=response_json)
+            await response.text()
+            return await self.async_get_lb_config()
+
     async def async_set_lb_fuse(self, fuse: int):
-        response = await self._async_get('lbconfig/false', True)
-        response_json = await response.json()
-        response_json['loadBalancingFuse'] = fuse
-        response = await self._async_post(self._get_url('lbconfig'), data=response_json)
-        await response.text()
+        return await self.async_set_lb_value('loadBalancingFuse', fuse)
 
     async def async_set_lb_fuse101(self, fuse: int):
-        response = await self._async_get('lbconfig/false', True)
-        response_json = await response.json()
-        response_json['loadBalancingFuse101'] = fuse
-        response = await self._async_post(self._get_url('lbconfig'), data=response_json)
-        await response.text()
+        return await self.async_set_lb_value('loadBalancingFuse101', fuse)
+
+    async def async_set_lb_enabled(self, enabled: bool) -> GaroLBConfig:
+        """Enable or disable load balancing for the complete charger group."""
+        async with self._lb_config_lock:
+            response = await self._async_get('lbconfig/false', True)
+            response_json = await response.json()
+            response_json['masterLoadBalanced'] = bool(enabled)
+            for slave in response_json.get('slaves', []):
+                slave['loadBalanced'] = bool(enabled)
+            response = await self._async_post(
+                self._get_url('lbconfig'), data=response_json)
+            await response.text()
+            return await self.async_get_lb_config()
 
     async def async_set_rfid_mode(self, enabled: bool):
         response = await self._async_post(self._get_url(f'rfidmode/{str(enabled).lower()}'))

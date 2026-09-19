@@ -20,8 +20,10 @@ from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
+    CONF_ALLOW_LOW_DLM_CURRENT,
     CONF_DEVICE_FETCH_INTERVAL,
     CONF_METER_FETCH_INTERVAL,
+    DEFAULT_ALLOW_LOW_DLM_CURRENT,
     DEFAULT_DEVICE_FETCH_INTERVAL,
     DEFAULT_METER_FETCH_INTERVAL,
     DOMAIN,
@@ -193,6 +195,12 @@ class GaroOptionsFlowHandler(OptionsFlow):
                             CONF_METER_FETCH_INTERVAL, DEFAULT_METER_FETCH_INTERVAL
                         ),
                     ): _INTERVAL,
+                    vol.Required(
+                        CONF_ALLOW_LOW_DLM_CURRENT,
+                        default=options.get(
+                            CONF_ALLOW_LOW_DLM_CURRENT, DEFAULT_ALLOW_LOW_DLM_CURRENT
+                        ),
+                    ): bool,
                 }
             ),
         )
