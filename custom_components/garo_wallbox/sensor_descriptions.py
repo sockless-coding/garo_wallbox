@@ -130,7 +130,7 @@ _CHARGER_FIELD_SPECS: list[_ChargerFieldSpec] = [
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        get_value=lambda charger: charger.accumulated_energy / 1000 if charger.accumulated_energy else None,
+        get_value=lambda charger: charger.accumulated_energy / 1000 if charger.accumulated_energy > 0 else None,
     ),
     _ChargerFieldSpec(
         key="charge_status",
